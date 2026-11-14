@@ -142,5 +142,40 @@ namespace ConsoleClient.Views
                 Console.WriteLine(posetilac);
             }
         }
+
+        public void ShowMenu()
+        {
+            while (true)
+            {
+                Console.WriteLine("\n--- Upravljanje posetiocima ---");
+                Console.WriteLine("1. Dodavanje posetioca");
+                Console.WriteLine("2. Izmena posetioca");
+                Console.WriteLine("3. Brisanje posetioca");
+                Console.WriteLine("4. Prikaz posetilaca");
+                Console.WriteLine("0. Izlaz");
+                Console.Write("Izaberite opciju: ");
+
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        AddPosetilac();
+                        break;
+                    case "2":
+                        UpdatePosetilac();
+                        break;
+                    case "3":
+                        RemovePosetilac();
+                        break;
+                    case "4":
+                        ShowPosetioci();
+                        break;
+                    case "0":
+                        return;
+                    default:
+                        Console.WriteLine("Neispravna opcija.");
+                        break;
+                }
+            }
+        }
     }
 }

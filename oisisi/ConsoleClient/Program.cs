@@ -6,4 +6,4 @@ string fileName = "posetioci.csv";
 PosetilacController controller = new PosetilacController(fileName);
 PosetilacConsoleView view = new PosetilacConsoleView(controller);
 
-view.ShowPosetioci();
+view.ShowMenu();
