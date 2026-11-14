@@ -1,6 +1,7 @@
 ﻿
 using Core.DAO;
 using Core.Models;
+using Core.Services;
 using System.Collections.Generic;
 
 namespace Core.Controllers
@@ -8,10 +9,12 @@ namespace Core.Controllers
     public class AutorController
     {
         private readonly AutorDAO _dao;
+        private readonly AutorKnjigaService _service;
 
-        public AutorController(string fileName)
+        public AutorController(AutorDAO dao, AutorKnjigaService service)
         {
-            _dao = new AutorDAO(fileName);
+            _dao = dao;
+            _service = service;
         }
 
         public void Add(Autor autor)
@@ -39,7 +42,7 @@ namespace Core.Controllers
             if (_dao.GetById(brojLicneKarte) == null)
                 return false;
 
-            _dao.Delete(brojLicneKarte);
+            _service.ObrisiAutora(brojLicneKarte);
             return true;
         }
 
