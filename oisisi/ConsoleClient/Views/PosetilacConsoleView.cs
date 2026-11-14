@@ -108,5 +108,20 @@ namespace ConsoleClient.Views
                 Console.WriteLine("Izmena posetioca nije uspela.");
             }
         }
+
+        public void RemovePosetilac()
+        {
+            Console.Write("Unesite broj clanske karte za brisanje: ");
+            string brojClanskeKarte = Console.ReadLine() ?? string.Empty;
+
+            if (_controller.Remove(brojClanskeKarte))
+            {
+                Console.WriteLine("Posetilac je uspesno obrisan.");
+            }
+            else
+            {
+                Console.WriteLine("Posetilac nije pronadjen.");
+            }
+        }
     }
 }
