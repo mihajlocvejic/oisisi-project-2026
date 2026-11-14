@@ -17,4 +17,4 @@ PosetilacConsoleView view = new PosetilacConsoleView(controller);
 KupovinaController kupovinaController = new KupovinaController(kupovinaFileName);
 KupovinaConsoleView kupovinaView = new KupovinaConsoleView(kupovinaController);
 
-kupovinaView.ShowKupovine();
+kupovinaView.ShowMenu();

@@ -113,6 +113,41 @@ namespace ConsoleClient.Views
             }
         }
 
+        public void ShowMenu()
+        {
+            while (true)
+            {
+                Console.WriteLine("\n--- Upravljanje kupovinama ---");
+                Console.WriteLine("1. Dodavanje kupovine");
+                Console.WriteLine("2. Izmena kupovine");
+                Console.WriteLine("3. Brisanje kupovine");
+                Console.WriteLine("4. Prikaz kupovina");
+                Console.WriteLine("0. Izlaz");
+                Console.Write("Izaberite opciju: ");
+
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        AddKupovina();
+                        break;
+                    case "2":
+                        UpdateKupovina();
+                        break;
+                    case "3":
+                        RemoveKupovina();
+                        break;
+                    case "4":
+                        ShowKupovine();
+                        break;
+                    case "0":
+                        return;
+                    default:
+                        Console.WriteLine("Neispravna opcija.");
+                        break;
+                }
+            }
+        }
+
         private string ReadRequiredString(string message)
         {
             while (true)
