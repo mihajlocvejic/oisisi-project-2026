@@ -17,9 +17,6 @@ namespace Core.Models
         public string BrojLicneKarte { get; set; }
         public int GodineIskustva { get; set; }
 
-        // ISBN brojevi knjiga koje je autor napisao.
-        public List<string> KnjigeISBN { get; set; }
-
         public Autor()
         {
             Ime = string.Empty;
@@ -28,7 +25,6 @@ namespace Core.Models
             Telefon = string.Empty;
             Email = string.Empty;
             BrojLicneKarte = string.Empty;
-            KnjigeISBN = new List<string>();
         }
 
         public Autor(string ime, string prezime,
@@ -45,7 +41,6 @@ namespace Core.Models
             Email = email;
             BrojLicneKarte = brojLicneKarte;
             GodineIskustva = godineIskustva;
-            KnjigeISBN = knjigeISBN;
         }
 
         public string[] ToCSV()
@@ -54,7 +49,7 @@ namespace Core.Models
             {
                 Ime,
                 Prezime,
-                DatumRodjenja.ToString("yyyy-MM-dd"),
+                DatumRodjenja.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),
                 Adresa.Ulica,
                 Adresa.Broj,
                 Adresa.Grad,
@@ -62,14 +57,13 @@ namespace Core.Models
                 Telefon,
                 Email,
                 BrojLicneKarte,
-                GodineIskustva.ToString(CultureInfo.InvariantCulture),
-                string.Join(";", KnjigeISBN)
+                GodineIskustva.ToString(CultureInfo.InvariantCulture)
             };
         }
 
         public void FromCSV(string[] values)
         {
-            if (values.Length != 12)
+            if (values.Length != 11)
             {
                 throw new FormatException(
                     "Neispravan format podataka autora.");
@@ -79,7 +73,7 @@ namespace Core.Models
             Prezime = values[1];
 
             DatumRodjenja = DateTime.ParseExact(
-                values[2], "yyyy-MM-dd",
+                values[2], "dd.MM.yyyy",
                 CultureInfo.InvariantCulture);
 
             Adresa = new Adresa(
@@ -95,19 +89,13 @@ namespace Core.Models
 
             GodineIskustva = int.Parse(
                 values[10], CultureInfo.InvariantCulture);
-
-            KnjigeISBN = string.IsNullOrEmpty(values[11])
-                ? new List<string>()
-                : new List<string>(
-                    values[11].Split(';'));
         }
 
         public override string ToString()
         {
             return $"{BrojLicneKarte} | {Ime} {Prezime} | " +
                    $"{DatumRodjenja:dd.MM.yyyy.} | {Adresa} | " +
-                   $"{Telefon} | {Email} | {GodineIskustva} | " +
-                   $"Broj knjiga: {KnjigeISBN.Count}";
+                   $"{Telefon} | {Email} | {GodineIskustva}";
         }
     }
 }
