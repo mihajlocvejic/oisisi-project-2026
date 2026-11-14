@@ -75,6 +75,26 @@ namespace ConsoleClient.Views
             }
         }
 
+        public void RemoveKupovina()
+        {
+            Console.Write("Unesite ID kupovine za brisanje: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Neispravan ID.");
+                return;
+            }
+
+            if (_controller.Remove(id))
+            {
+                Console.WriteLine("Kupovina je uspesno obrisana.");
+            }
+            else
+            {
+                Console.WriteLine("Kupovina nije pronadjena.");
+            }
+        }
+
         private string ReadRequiredString(string message)
         {
             while (true)
