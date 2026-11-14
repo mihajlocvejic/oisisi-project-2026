@@ -17,29 +17,14 @@ namespace ConsoleClient.Views
 
         public void AddPosetilac()
         {
-            Console.Write("Ime: ");
-            string ime = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Prezime: ");
-            string prezime = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Datum rodjenja (dd.MM.yyyy): ");
-            DateTime datumRodjenja = DateTime.ParseExact(Console.ReadLine() ?? "", "dd.MM.yyyy", CultureInfo.InvariantCulture);
-
-            Console.Write("Kontakt telefon: ");
-            string kontaktTelefon = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Email: ");
-            string email = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Broj clanske karte: ");
-            string brojClanskeKarte = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Godina clanstva: ");
-            int godinaClanstva = int.Parse(Console.ReadLine() ?? "");
-
-            Console.Write("Status (R/V): ");
-            StatusPosetioca status = Enum.Parse<StatusPosetioca>(Console.ReadLine() ?? "", true);
+            string ime = ReadRequiredString("Ime: ");
+            string prezime = ReadRequiredString("Prezime: ");
+            DateTime datumRodjenja = ReadDate("Datum rodjenja (dd.MM.yyyy): ");
+            string kontaktTelefon = ReadPhone("Kontakt telefon: ");
+            string email = ReadEmail("Email: ");
+            string brojClanskeKarte = ReadRequiredString("Broj clanske karte: ");
+            int godinaClanstva = ReadMembershipYear("Godina clanstva: ");
+            StatusPosetioca status = ReadStatus("Status (R/V): ");
 
             Posetilac posetilac = new Posetilac(
                 ime, prezime, datumRodjenja,
@@ -72,32 +57,14 @@ namespace ConsoleClient.Views
 
             Console.WriteLine($"Trenutni podaci: {postojeci}");
 
-            Console.Write("Novo ime: ");
-            string ime = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Novo prezime: ");
-            string prezime = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Novi datum rodjenja (dd.MM.yyyy): ");
-            DateTime datumRodjenja = DateTime.ParseExact(
-                Console.ReadLine() ?? "", "dd.MM.yyyy",
-                CultureInfo.InvariantCulture);
-
-            Console.Write("Novi kontakt telefon: ");
-            string kontaktTelefon = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Novi email: ");
-            string email = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Novi broj clanske karte: ");
-            string noviBrojClanskeKarte = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Nova godina clanstva: ");
-            int godinaClanstva = int.Parse(Console.ReadLine() ?? "");
-
-            Console.Write("Novi status (R/V): ");
-            StatusPosetioca status = Enum.Parse<StatusPosetioca>(
-                Console.ReadLine() ?? "", true);
+            string ime = ReadRequiredString("Novo ime: ");
+            string prezime = ReadRequiredString("Novo prezime: ");
+            DateTime datumRodjenja = ReadDate("Novi datum rodjenja (dd.MM.yyyy): ");
+            string kontaktTelefon = ReadPhone("Novi kontakt telefon: ");
+            string email = ReadEmail("Novi email: ");
+            string noviBrojClanskeKarte = ReadRequiredString("Novi broj clanske karte: ");
+            int godinaClanstva = ReadMembershipYear("Nova godina clanstva: ");
+            StatusPosetioca status = ReadStatus("Novi status (R/V): ");
 
             Posetilac izmenjeni = new Posetilac(
                 ime, prezime, datumRodjenja,
@@ -180,6 +147,113 @@ namespace ConsoleClient.Views
                         Console.WriteLine("Neispravna opcija.");
                         break;
                 }
+            }
+        }
+
+        private string ReadRequiredString(string message)
+        {
+            while (true)
+            {
+                Console.Write(message);
+                string value = Console.ReadLine()?.Trim() ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    Console.WriteLine("Polje ne sme biti prazno.");
+                    continue;
+                }
+
+                if (value.Contains('|'))
+                {
+                    Console.WriteLine("Znak | nije dozvoljen.");
+                    continue;
+                }
+
+                return value;
+            }
+        }
+
+        private DateTime ReadDate(string message)
+        {
+            while (true)
+            {
+                Console.Write(message);
+
+                if (DateTime.TryParseExact(
+                    Console.ReadLine(),
+                    "dd.MM.yyyy",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out DateTime date) && date <= DateTime.Today)
+                {
+                    return date;
+                }
+
+                Console.WriteLine("Neispravan datum. Pokusajte ponovo.");
+            }
+        }
+
+        private int ReadMembershipYear(string message)
+        {
+            while (true)
+            {
+                Console.Write(message);
+
+                if (int.TryParse(Console.ReadLine(), out int year) && year > 0)
+                {
+                    return year;
+                }
+
+                Console.WriteLine("Unesite ispravnu godinu clanstva.");
+            }
+        }
+
+        private StatusPosetioca ReadStatus(string message)
+        {
+            while (true)
+            {
+                Console.Write(message);
+                string value = Console.ReadLine()?.Trim().ToUpperInvariant() ?? "";
+
+                if (value == "R")
+                    return StatusPosetioca.R;
+
+                if (value == "V")
+                    return StatusPosetioca.V;
+
+                Console.WriteLine("Neispravan status. Unesite R ili V.");
+            }
+        }
+
+        private string ReadEmail(string message)
+        {
+            while (true)
+            {
+                string email = ReadRequiredString(message);
+
+                if (System.Net.Mail.MailAddress.TryCreate(email, out var address)
+                    && address.Address == email)
+                {
+                    return email;
+                }
+
+                Console.WriteLine("Neispravna email adresa.");
+            }
+        }
+
+        private string ReadPhone(string message)
+        {
+            while (true)
+            {
+                string phone = ReadRequiredString(message);
+
+                if (System.Text.RegularExpressions.Regex.IsMatch(
+                    phone, @"^\+?[0-9]{6,15}$"))
+                {
+                    return phone;
+                }
+
+                Console.WriteLine("Neispravan broj telefona.");
             }
         }
     }
