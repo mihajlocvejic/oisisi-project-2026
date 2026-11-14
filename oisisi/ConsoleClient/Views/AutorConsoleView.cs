@@ -100,6 +100,7 @@ namespace ConsoleClient.Views
                 Console.WriteLine("Autor nije pronadjen.");
         }
 
+
         public void UpdateAutor()
         {
             Console.Write("Broj licne karte autora: ");
@@ -113,23 +114,49 @@ namespace ConsoleClient.Views
                 return;
             }
 
-            Console.Write("Novo ime: ");
-            string ime = Console.ReadLine() ?? string.Empty;
+            Console.WriteLine("Unesite nove podatke autora.");
 
-            Console.Write("Novo prezime: ");
-            string prezime = Console.ReadLine() ?? string.Empty;
+            Console.Write("Ime: ");
+            autor.Ime = Console.ReadLine() ?? string.Empty;
 
-            Console.Write("Novi email: ");
-            string email = Console.ReadLine() ?? string.Empty;
+            Console.Write("Prezime: ");
+            autor.Prezime = Console.ReadLine() ?? string.Empty;
 
-            autor.Ime = ime;
-            autor.Prezime = prezime;
-            autor.Email = email;
+            Console.Write("Datum rodjenja (dd.MM.yyyy): ");
+            autor.DatumRodjenja = DateTime.ParseExact(
+                Console.ReadLine() ?? "",
+                "dd.MM.yyyy",
+                CultureInfo.InvariantCulture
+            );
+
+            Console.Write("Ulica: ");
+            string ulica = Console.ReadLine() ?? string.Empty;
+
+            Console.Write("Broj: ");
+            string broj = Console.ReadLine() ?? string.Empty;
+
+            Console.Write("Grad: ");
+            string grad = Console.ReadLine() ?? string.Empty;
+
+            Console.Write("Drzava: ");
+            string drzava = Console.ReadLine() ?? string.Empty;
+
+            autor.Adresa = new Adresa(ulica, broj, grad, drzava);
+
+            Console.Write("Telefon: ");
+            autor.Telefon = Console.ReadLine() ?? string.Empty;
+
+            Console.Write("Email: ");
+            autor.Email = Console.ReadLine() ?? string.Empty;
+
+            Console.Write("Godine iskustva: ");
+            autor.GodineIskustva = int.Parse(Console.ReadLine() ?? "");
 
             if (_controller.Update(brojLicneKarte, autor))
                 Console.WriteLine("Autor je uspesno izmenjen.");
             else
                 Console.WriteLine("Izmena nije uspela.");
         }
+
     }
 }
