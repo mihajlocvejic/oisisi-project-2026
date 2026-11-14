@@ -7,7 +7,14 @@ string fileName = Path.GetFullPath(
     $"..{separator}..{separator}..{separator}Data{separator}posetioci.csv",
     AppContext.BaseDirectory);
 
+string kupovinaFileName = Path.GetFullPath(
+    $"..{separator}..{separator}..{separator}Data{separator}kupovine.csv",
+    AppContext.BaseDirectory);
+
 PosetilacController controller = new PosetilacController(fileName);
 PosetilacConsoleView view = new PosetilacConsoleView(controller);
 
-view.ShowMenu();
+KupovinaController kupovinaController = new KupovinaController(kupovinaFileName);
+KupovinaConsoleView kupovinaView = new KupovinaConsoleView(kupovinaController);
+
+kupovinaView.ShowMenu();
