@@ -95,6 +95,24 @@ namespace ConsoleClient.Views
             }
         }
 
+        public void ShowKupovine()
+        {
+            List<Kupovina> kupovine = _controller.GetAll();
+
+            if (kupovine.Count == 0)
+            {
+                Console.WriteLine("Nema evidentiranih kupovina.");
+                return;
+            }
+
+            Console.WriteLine("Evidentirane kupovine:");
+
+            foreach (Kupovina kupovina in kupovine)
+            {
+                Console.WriteLine(kupovina);
+            }
+        }
+
         private string ReadRequiredString(string message)
         {
             while (true)
