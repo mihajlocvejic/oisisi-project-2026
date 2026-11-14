@@ -2,6 +2,7 @@
 using Core.Models;
 using System;
 using System.Globalization;
+using System.Collections.Generic;
 
 namespace ConsoleClient.Views
 {
@@ -121,6 +122,24 @@ namespace ConsoleClient.Views
             else
             {
                 Console.WriteLine("Posetilac nije pronadjen.");
+            }
+        }
+
+        public void ShowPosetioci()
+        {
+            List<Posetilac> posetioci = _controller.GetAll();
+
+            if (posetioci.Count == 0)
+            {
+                Console.WriteLine("Nema registrovanih posetilaca.");
+                return;
+            }
+
+            Console.WriteLine("Registrovani posetioci:");
+
+            foreach (Posetilac posetilac in posetioci)
+            {
+                Console.WriteLine(posetilac);
             }
         }
     }
