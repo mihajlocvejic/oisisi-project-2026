@@ -11,7 +11,7 @@ namespace Core.Models
         public DateTime DatumRodjenja { get; set; }
         public string KontaktTelefon { get; set; }
         public string Email { get; set; }
-        public string BrojClanskeKarte { get; set; }
+        public string BrojClanskeKarte { get; private set; }
         public int GodinaClanstva { get; set; }
         public StatusPosetioca Status { get; set; }
         public double ProsecnaOcena { get; set; }
