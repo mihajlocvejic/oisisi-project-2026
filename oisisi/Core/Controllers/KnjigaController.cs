@@ -1,6 +1,7 @@
 ﻿
 using Core.DAO;
 using Core.Models;
+using Core.Services;
 using System.Collections.Generic;
 
 namespace Core.Controllers
@@ -8,15 +9,28 @@ namespace Core.Controllers
     public class KnjigaController
     {
         private readonly KnjigaDAO _dao;
+        private readonly AutorKnjigaService _service;
 
-        public KnjigaController(string fileName)
+        public KnjigaController(
+            KnjigaDAO dao,
+            AutorKnjigaService service)
         {
-            _dao = new KnjigaDAO(fileName);
+            _dao = dao;
+            _service = service;
         }
 
-        public void Add(Knjiga knjiga)
+        public List<Autor> GetAutoriKnjige(string isbn)
         {
-            _dao.Add(knjiga);
+            return _service.GetAutoriKnjige(isbn);
+        }
+
+        public void Add(
+            Knjiga knjiga,
+            List<string> brojeviLicnihKarata)
+        {
+            _service.DodajKnjigu(
+                knjiga,
+                brojeviLicnihKarata);
         }
 
         public bool Update(string isbn, Knjiga knjiga)
@@ -26,10 +40,9 @@ namespace Core.Controllers
             if (existing == null)
                 return false;
 
-            // ISBN je jedinstveni identifikator knjige.
             knjiga.ISBN = isbn;
-
             _dao.Update(knjiga);
+
             return true;
         }
 
@@ -38,7 +51,7 @@ namespace Core.Controllers
             if (_dao.GetByISBN(isbn) == null)
                 return false;
 
-            _dao.Delete(isbn);
+            _service.ObrisiKnjigu(isbn);
             return true;
         }
 
@@ -51,5 +64,22 @@ namespace Core.Controllers
         {
             return _dao.GetAll();
         }
+
+        public List<string> GetAutoriZaKnjigu(string isbn)
+        {
+            return _service.GetAutoriZaKnjigu(isbn);
+        }
+
+        public void UkloniAutoraSaKnjige(string brojLicneKarte, string isbn)
+        {
+            _service.UkloniAutoraSaKnjige(brojLicneKarte, isbn);
+        }
+
+        public void DodajAutoraNaKnjigu(string brojLicneKarte, string isbn)
+        {
+            _service.DodajAutoraNaKnjigu(brojLicneKarte, isbn);
+        }
+
+
     }
 }

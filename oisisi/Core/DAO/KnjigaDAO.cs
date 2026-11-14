@@ -112,12 +112,6 @@ namespace Core.DAO
                 throw new ArgumentException(
                     "Broj strana mora biti veci od nule.");
 
-            if (knjiga.AutoriLicneKarte == null ||
-                knjiga.AutoriLicneKarte.Count == 0 ||
-                knjiga.AutoriLicneKarte.Any(string.IsNullOrWhiteSpace))
-                throw new ArgumentException(
-                    "Knjiga mora imati najmanje jednog autora.");
-
             if (string.IsNullOrWhiteSpace(knjiga.SifraIzdavaca))
                 throw new ArgumentException(
                     "Sifra izdavaca je obavezna.");

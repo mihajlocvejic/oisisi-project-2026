@@ -15,9 +15,6 @@ namespace Core.Models
         public decimal Cena { get; set; }
         public int BrojStrana { get; set; }
 
-        // Brojevi licnih karata autora knjige.
-        public List<string> AutoriLicneKarte { get; set; }
-
         // Sifra izdavaca knjige.
         public string SifraIzdavaca { get; set; }
 
@@ -30,7 +27,6 @@ namespace Core.Models
             ISBN = string.Empty;
             Naziv = string.Empty;
             Zanr = string.Empty;
-            AutoriLicneKarte = new List<string>();
             SifraIzdavaca = string.Empty;
             KupciClanskeKarte = new List<string>();
             ListaZeljaClanskeKarte = new List<string>();
@@ -54,7 +50,6 @@ namespace Core.Models
             GodinaIzdanja = godinaIzdanja;
             Cena = cena;
             BrojStrana = brojStrana;
-            AutoriLicneKarte = autoriLicneKarte;
             SifraIzdavaca = sifraIzdavaca;
             KupciClanskeKarte = kupciClanskeKarte;
             ListaZeljaClanskeKarte = listaZeljaClanskeKarte;
@@ -70,7 +65,6 @@ namespace Core.Models
                 GodinaIzdanja.ToString(CultureInfo.InvariantCulture),
                 Cena.ToString(CultureInfo.InvariantCulture),
                 BrojStrana.ToString(CultureInfo.InvariantCulture),
-                string.Join(";", AutoriLicneKarte),
                 SifraIzdavaca,
                 string.Join(";", KupciClanskeKarte),
                 string.Join(";", ListaZeljaClanskeKarte)
@@ -79,7 +73,7 @@ namespace Core.Models
 
         public void FromCSV(string[] values)
         {
-            if (values.Length != 10)
+            if (values.Length != 9)
             {
                 throw new FormatException(
                     "Neispravan format podataka knjige.");
@@ -98,10 +92,9 @@ namespace Core.Models
             BrojStrana = int.Parse(
                 values[5], CultureInfo.InvariantCulture);
 
-            AutoriLicneKarte = ParseList(values[6]);
-            SifraIzdavaca = values[7];
-            KupciClanskeKarte = ParseList(values[8]);
-            ListaZeljaClanskeKarte = ParseList(values[9]);
+            SifraIzdavaca = values[6];
+            KupciClanskeKarte = ParseList(values[7]);
+            ListaZeljaClanskeKarte = ParseList(values[8]);
         }
 
         private static List<string> ParseList(string value)
@@ -115,8 +108,7 @@ namespace Core.Models
         {
             return $"{ISBN} | {Naziv} | {Zanr} | " +
                    $"{GodinaIzdanja} | {Cena:F2} | " +
-                   $"{BrojStrana} strana | " +
-                   $"Broj autora: {AutoriLicneKarte.Count}";
+                   $"{BrojStrana} strana";
         }
     }
 }
