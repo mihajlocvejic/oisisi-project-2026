@@ -33,6 +33,48 @@ namespace ConsoleClient.Views
             Console.WriteLine("Kupovina je uspesno dodata.");
         }
 
+        public void UpdateKupovina()
+        {
+            Console.Write("Unesite ID kupovine za izmenu: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("Neispravan ID.");
+                return;
+            }
+
+            Kupovina? postojeca = _controller.GetAll()
+                .Find(k => k.Id == id);
+
+            if (postojeca == null)
+            {
+                Console.WriteLine("Kupovina nije pronadjena.");
+                return;
+            }
+
+            Console.WriteLine($"Trenutni podaci: {postojeca}");
+
+            string brojClanskeKarte = ReadRequiredString("Novi broj clanske karte: ");
+            string isbn = ReadRequiredString("Novi ISBN knjige: ");
+            DateTime datumKupovine = ReadDate("Novi datum kupovine (dd.MM.yyyy): ");
+            int ocena = ReadOcena("Nova ocena (1-5): ");
+            string komentar = ReadKomentar("Novi komentar: ");
+
+            Kupovina izmenjena = new Kupovina(
+                id, brojClanskeKarte, isbn,
+                datumKupovine, ocena, komentar
+            );
+
+            if (_controller.Update(id, izmenjena))
+            {
+                Console.WriteLine("Kupovina je uspesno izmenjena.");
+            }
+            else
+            {
+                Console.WriteLine("Izmena kupovine nije uspela.");
+            }
+        }
+
         private string ReadRequiredString(string message)
         {
             while (true)
