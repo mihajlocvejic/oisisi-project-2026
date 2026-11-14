@@ -47,9 +47,14 @@ namespace ConsoleClient.Views
                 godinaClanstva, status, 0
             );
 
-            _controller.Add(posetilac);
-
-            Console.WriteLine("Posetilac je uspesno dodat.");
+            if (_controller.Add(posetilac))
+            {
+                Console.WriteLine("Posetilac je uspesno dodat.");
+            }
+            else
+            {
+                Console.WriteLine("Broj clanske karte vec postoji.");
+            }
         }
 
         public void UpdatePosetilac()
@@ -106,7 +111,7 @@ namespace ConsoleClient.Views
             }
             else
             {
-                Console.WriteLine("Izmena posetioca nije uspela.");
+                Console.WriteLine("Izmena nije uspela. Broj clanske karte vec postoji ili posetilac nije pronadjen.");
             }
         }
 

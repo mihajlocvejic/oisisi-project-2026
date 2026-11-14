@@ -18,10 +18,15 @@ namespace Core.DAO
             _posetioci = _serializer.FromCSV(_fileName);
         }
 
-        public void Add(Posetilac posetilac)
+        public bool Add(Posetilac posetilac)
         {
+            if (_posetioci.Exists(p => p.BrojClanskeKarte == posetilac.BrojClanskeKarte))
+                return false;
+
             _posetioci.Add(posetilac);
             _serializer.ToCSV(_fileName, _posetioci);
+
+            return true;
         }
 
         public bool Update(string brojClanskeKarte, Posetilac posetilac)
@@ -29,6 +34,10 @@ namespace Core.DAO
             int index = _posetioci.FindIndex(p => p.BrojClanskeKarte == brojClanskeKarte);
 
             if (index == -1)
+                return false;
+
+            if (brojClanskeKarte != posetilac.BrojClanskeKarte &&
+                _posetioci.Exists(p => p.BrojClanskeKarte == posetilac.BrojClanskeKarte))
                 return false;
 
             _posetioci[index] = posetilac;

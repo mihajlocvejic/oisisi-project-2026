@@ -13,9 +13,9 @@ namespace Core.Controllers
             _dao = new PosetilacDAO(fileName);
         }
 
-        public void Add(Posetilac posetilac)
+        public bool Add(Posetilac posetilac)
         {
-            _dao.Add(posetilac);
+            return _dao.Add(posetilac);
         }
 
         public bool Update(string brojClanskeKarte, Posetilac posetilac)
