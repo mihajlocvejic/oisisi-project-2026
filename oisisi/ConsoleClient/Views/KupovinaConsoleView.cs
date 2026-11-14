@@ -28,9 +28,14 @@ namespace ConsoleClient.Views
                 datumKupovine, ocena, komentar
             );
 
-            _controller.Add(kupovina);
-
-            Console.WriteLine("Kupovina je uspesno dodata.");
+            if (_controller.Add(kupovina))
+            {
+                Console.WriteLine("Kupovina je uspesno dodata.");
+            }
+            else
+            {
+                Console.WriteLine("Kupovina nije dodata. Podaci nisu validni.");
+            }
         }
 
         public void UpdateKupovina()
