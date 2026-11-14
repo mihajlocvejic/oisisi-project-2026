@@ -62,7 +62,7 @@ namespace ConsoleClient.Views
             DateTime datumRodjenja = ReadDate("Novi datum rodjenja (dd.MM.yyyy): ");
             string kontaktTelefon = ReadPhone("Novi kontakt telefon: ");
             string email = ReadEmail("Novi email: ");
-            string noviBrojClanskeKarte = ReadRequiredString("Novi broj clanske karte: ");
+            string noviBrojClanskeKarte = postojeci.BrojClanskeKarte;
             int godinaClanstva = ReadMembershipYear("Nova godina clanstva: ");
             StatusPosetioca status = ReadStatus("Novi status (R/V): ");
 
@@ -78,7 +78,7 @@ namespace ConsoleClient.Views
             }
             else
             {
-                Console.WriteLine("Izmena nije uspela. Broj clanske karte vec postoji ili posetilac nije pronadjen.");
+                Console.WriteLine("Izmena posetioca nije uspela.");
             }
         }
 

@@ -36,8 +36,7 @@ namespace Core.DAO
             if (index == -1)
                 return false;
 
-            if (brojClanskeKarte != posetilac.BrojClanskeKarte &&
-                _posetioci.Exists(p => p.BrojClanskeKarte == posetilac.BrojClanskeKarte))
+            if (brojClanskeKarte != posetilac.BrojClanskeKarte)
                 return false;
 
             _posetioci[index] = posetilac;
