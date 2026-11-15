@@ -7,7 +7,17 @@ namespace Core.Models
 {
     public class Adresa : ISerializable
     {
-        public int Id { get; set; }
+        private int _id;
+        public int Id
+        {
+            get => _id;
+            internal init
+            {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(value), "ID mora biti pozitivan.");
+                _id = value;
+            }
+        }
 
         public string Ulica { get; set; } = string.Empty;
         public string Broj { get; set; } = string.Empty;
@@ -47,7 +57,14 @@ namespace Core.Models
                     "Neispravan format adrese.");
             }
 
-            Id = int.Parse(values[0], System.Globalization.CultureInfo.InvariantCulture);
+            if (_id != 0)
+                throw new InvalidOperationException("Vec kreirana adresa se ne moze ponovo ucitavati niti joj se moze menjati ID.");
+
+            int id = int.Parse(values[0], System.Globalization.CultureInfo.InvariantCulture);
+            if (id <= 0)
+                throw new FormatException("ID adrese mora biti pozitivan.");
+
+            _id = id;
             Ulica = values[1];
             Broj = values[2];
             Grad = values[3];

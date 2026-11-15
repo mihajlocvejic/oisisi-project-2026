@@ -60,11 +60,12 @@ namespace Core.DAO
                 throw new InvalidOperationException(
                     "Veza vec postoji.");
 
+            List<AutorKnjiga> updated = new(_veze) { veza };
+            Save(updated);
             _veze.Add(veza);
-            Save();
         }
 
-        public void Delete(string brojLicneKarte, string isbn)
+        public void Remove(string brojLicneKarte, string isbn)
         {
             AutorKnjiga? veza = _veze.FirstOrDefault(v =>
                 EntityComparison.SameIdentifier(v.BrojLicneKarte, brojLicneKarte) &&
@@ -74,18 +75,20 @@ namespace Core.DAO
                 throw new InvalidOperationException(
                     "Veza ne postoji.");
 
+            List<AutorKnjiga> updated = new(_veze);
+            updated.Remove(veza);
+            Save(updated);
             _veze.Remove(veza);
-            Save();
         }
 
-        private void Save()
+        private void Save(List<AutorKnjiga> veze)
         {
             string? directory = Path.GetDirectoryName(_filePath);
 
             if (!string.IsNullOrEmpty(directory))
                 Directory.CreateDirectory(directory);
 
-            _serializer.ToCSV(_filePath, _veze);
+            _serializer.ToCSV(_filePath, veze);
         }
     }
 }

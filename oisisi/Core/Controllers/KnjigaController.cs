@@ -1,8 +1,8 @@
-﻿
-using Core.DAO;
+﻿using Core.DAO;
 using Core.Models;
 using Core.Services;
-using System.Collections.Generic;
+using Core.Utils;
+using Core.Validation;
 
 namespace Core.Controllers
 {
@@ -11,75 +11,58 @@ namespace Core.Controllers
         private readonly KnjigaDAO _dao;
         private readonly AutorKnjigaService _service;
 
-        public KnjigaController(
-            KnjigaDAO dao,
-            AutorKnjigaService service)
+        public KnjigaController(KnjigaDAO dao, AutorKnjigaService service)
         {
+            ArgumentNullException.ThrowIfNull(dao);
+            ArgumentNullException.ThrowIfNull(service);
             _dao = dao;
             _service = service;
         }
 
-        public List<Autor> GetAutoriKnjige(string isbn)
+        public bool Add(Knjiga? knjiga, List<string>? brojeviLicnihKarata)
         {
-            return _service.GetAutoriKnjige(isbn);
+            if (!KnjigaValidator.IsValid(knjiga) || brojeviLicnihKarata == null
+                || brojeviLicnihKarata.Any(id => !AutorValidator.IsValidIdentityCard(id))) return false;
+            try { _service.DodajKnjigu(knjiga!, brojeviLicnihKarata); return true; }
+            catch (ArgumentException) { return false; }
+            catch (InvalidOperationException) { return false; }
         }
 
-        public void Add(
-            Knjiga knjiga,
-            List<string> brojeviLicnihKarata)
+        public bool Update(string isbn, Knjiga? knjiga)
         {
-            _service.DodajKnjigu(
-                knjiga,
-                brojeviLicnihKarata);
-        }
-
-        public bool Update(string isbn, Knjiga knjiga)
-        {
-            Knjiga? existing = _dao.GetByISBN(isbn);
-
-            if (existing == null)
-                return false;
-
-            knjiga.ISBN = isbn;
-            _dao.Update(knjiga);
-
-            return true;
+            if (!KnjigaValidator.IsValidISBN(isbn) || !KnjigaValidator.IsValid(knjiga)
+                || !EntityComparison.SameISBN(isbn, knjiga!.ISBN) || _dao.GetByISBN(isbn) == null) return false;
+            try { _dao.Update(knjiga); return true; }
+            catch (ArgumentException) { return false; }
+            catch (InvalidOperationException) { return false; }
         }
 
         public bool Remove(string isbn)
         {
-            if (_dao.GetByISBN(isbn) == null)
-                return false;
-
-            _service.ObrisiKnjigu(isbn);
-            return true;
+            if (!KnjigaValidator.IsValidISBN(isbn) || _dao.GetByISBN(isbn) == null) return false;
+            try { _service.ObrisiKnjigu(isbn); return true; }
+            catch (InvalidOperationException) { return false; }
         }
 
-        public Knjiga? GetByISBN(string isbn)
+        public Knjiga? GetByISBN(string isbn) => _dao.GetByISBN(isbn);
+        public List<Knjiga> GetAll() => _dao.GetAll();
+        public List<Autor> GetAutoriKnjige(string isbn) => _service.GetAutoriKnjige(isbn);
+        public List<string> GetAutoriZaKnjigu(string isbn) => _service.GetAutoriZaKnjigu(isbn);
+        public bool AutorPostoji(string id) => AutorValidator.IsValidIdentityCard(id) && _service.AutorPostoji(id);
+
+        public bool UkloniAutoraSaKnjige(string brojLicneKarte, string isbn)
         {
-            return _dao.GetByISBN(isbn);
+            if (!AutorValidator.IsValidIdentityCard(brojLicneKarte) || !KnjigaValidator.IsValidISBN(isbn)) return false;
+            try { _service.UkloniAutoraSaKnjige(brojLicneKarte, isbn); return true; }
+            catch (InvalidOperationException) { return false; }
         }
 
-        public List<Knjiga> GetAll()
+        public bool DodajAutoraNaKnjigu(string brojLicneKarte, string isbn)
         {
-            return _dao.GetAll();
+            if (!AutorValidator.IsValidIdentityCard(brojLicneKarte) || !KnjigaValidator.IsValidISBN(isbn)) return false;
+            try { _service.DodajAutoraNaKnjigu(brojLicneKarte, isbn); return true; }
+            catch (ArgumentException) { return false; }
+            catch (InvalidOperationException) { return false; }
         }
-
-        public List<string> GetAutoriZaKnjigu(string isbn)
-        {
-            return _service.GetAutoriZaKnjigu(isbn);
-        }
-
-        public void UkloniAutoraSaKnjige(string brojLicneKarte, string isbn)
-        {
-            _service.UkloniAutoraSaKnjige(brojLicneKarte, isbn);
-        }
-
-        public void DodajAutoraNaKnjigu(string brojLicneKarte, string isbn)
-        {
-            _service.DodajAutoraNaKnjigu(brojLicneKarte, isbn);
-        }
-
-
     }
 }
