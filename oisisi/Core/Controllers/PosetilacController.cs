@@ -8,10 +8,14 @@ namespace Core.Controllers
     public class PosetilacController
     {
         private readonly PosetilacDAO _dao;
+        private readonly KupovinaDAO _kupovinaDAO;
 
-        public PosetilacController(string fileName, AdresaDAO? adresaDAO = null)
+        public PosetilacController(
+            PosetilacDAO dao,
+            KupovinaDAO kupovinaDAO)
         {
-            _dao = new PosetilacDAO(fileName, adresaDAO);
+            _dao = dao;
+            _kupovinaDAO = kupovinaDAO;
         }
 
         public bool Add(Posetilac posetilac)
@@ -32,7 +36,15 @@ namespace Core.Controllers
 
         public bool Remove(string brojClanskeKarte)
         {
+            if (_kupovinaDAO.GetByPosetilac(brojClanskeKarte).Count > 0)
+                return false;
+
             return _dao.Remove(brojClanskeKarte);
+        }
+
+        public Posetilac? GetById(string brojClanskeKarte)
+        {
+            return _dao.GetById(brojClanskeKarte);
         }
 
         public List<Posetilac> GetAll()

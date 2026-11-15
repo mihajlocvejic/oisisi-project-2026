@@ -10,9 +10,9 @@ namespace ConsoleClient.Views
     public class PosetilacConsoleView
     {
         private readonly PosetilacController _controller;
-        private readonly AdresaConsoleView? _adrese;
+        private readonly AdresaConsoleView _adrese;
 
-        public PosetilacConsoleView(PosetilacController controller, AdresaConsoleView? adrese = null)
+        public PosetilacConsoleView(PosetilacController controller, AdresaConsoleView adrese)
         {
             _controller = controller;
             _adrese = adrese;
@@ -31,11 +31,9 @@ namespace ConsoleClient.Views
 
             Posetilac posetilac = new Posetilac(
                 ime, prezime, datumRodjenja,
-                kontaktTelefon, email, brojClanskeKarte,
-                godinaClanstva, status, 0
+                ReadAddress(), kontaktTelefon, email,
+                brojClanskeKarte, godinaClanstva, status
             );
-
-            posetilac.Adresa = ReadAddress();
 
             if (_controller.Add(posetilac))
             {
@@ -52,7 +50,7 @@ namespace ConsoleClient.Views
             Console.Write("Unesite broj clanske karte posetioca za izmenu: ");
             string brojClanskeKarte = Console.ReadLine() ?? string.Empty;
 
-            Posetilac? postojeci = _controller.GetAll().Find(p => p.BrojClanskeKarte == brojClanskeKarte);
+            Posetilac? postojeci = _controller.GetById(brojClanskeKarte);
 
             if (postojeci == null)
             {
@@ -73,11 +71,9 @@ namespace ConsoleClient.Views
 
             Posetilac izmenjeni = new Posetilac(
                 ime, prezime, datumRodjenja,
-                kontaktTelefon, email, noviBrojClanskeKarte,
-                godinaClanstva, status, postojeci.ProsecnaOcena
+                ReadAddress(), kontaktTelefon, email,
+                noviBrojClanskeKarte, godinaClanstva, status
             );
-
-            izmenjeni.Adresa = ReadAddress();
 
             if (_controller.Update(brojClanskeKarte, izmenjeni))
             {
@@ -92,7 +88,13 @@ namespace ConsoleClient.Views
         public void RemovePosetilac()
         {
             Console.Write("Unesite broj clanske karte za brisanje: ");
-            string brojClanskeKarte = Console.ReadLine() ?? string.Empty;
+            string brojClanskeKarte = Console.ReadLine()?.Trim() ?? string.Empty;
+
+            if (_controller.GetById(brojClanskeKarte) == null)
+            {
+                Console.WriteLine("Posetilac nije pronadjen.");
+                return;
+            }
 
             if (_controller.Remove(brojClanskeKarte))
             {
@@ -100,7 +102,7 @@ namespace ConsoleClient.Views
             }
             else
             {
-                Console.WriteLine("Posetilac nije pronadjen.");
+                Console.WriteLine("Posetilac ima evidentirane kupovine i ne moze biti obrisan.");
             }
         }
 
@@ -119,6 +121,22 @@ namespace ConsoleClient.Views
             foreach (Posetilac posetilac in posetioci)
             {
                 Console.WriteLine(posetilac);
+
+                Console.WriteLine("Kupovine:");
+
+                foreach (Kupovina kupovina in posetilac.Kupovine)
+                {
+                    Console.WriteLine($"  - {kupovina}");
+                }
+
+                Console.WriteLine("Lista zelja:");
+
+                foreach (string isbn in posetilac.ListaZeljaISBN)
+                {
+                    Console.WriteLine($"  - {isbn}");
+                }
+
+                Console.WriteLine();
             }
         }
 
@@ -266,8 +284,6 @@ namespace ConsoleClient.Views
         }
         private Adresa ReadAddress()
         {
-            if (_adrese == null)
-                throw new InvalidOperationException("Prikaz adresa nije povezan sa ovim menijem.");
             return _adrese.SelectAddress();
         }
     }
