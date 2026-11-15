@@ -206,7 +206,7 @@ namespace Core.Services
                     uklonjeneVeze.Add(isbn);
                 }
 
-                _autorDAO.Delete(brojLicneKarte);
+                _autorDAO.Remove(brojLicneKarte);
             }
             catch
             {
