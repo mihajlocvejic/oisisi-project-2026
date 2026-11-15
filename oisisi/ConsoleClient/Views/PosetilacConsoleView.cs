@@ -1,5 +1,6 @@
 ﻿using Core.Controllers;
 using Core.Models;
+using Core.Validation;
 using System;
 using System.Globalization;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace ConsoleClient.Views
             DateTime datumRodjenja = ReadDate("Datum rodjenja (dd.MM.yyyy): ");
             string kontaktTelefon = ReadPhone("Kontakt telefon: ");
             string email = ReadEmail("Email: ");
-            string brojClanskeKarte = ReadRequiredString("Broj clanske karte: ");
+            string brojClanskeKarte = ReadMembershipCard("Broj clanske karte: ");
             int godinaClanstva = ReadMembershipYear("Godina clanstva: ");
             StatusPosetioca status = ReadStatus("Status (R/V): ");
 
@@ -38,7 +39,7 @@ namespace ConsoleClient.Views
             }
             else
             {
-                Console.WriteLine("Broj clanske karte vec postoji.");
+                Console.WriteLine("Podaci nisu validni ili broj clanske karte vec postoji.");
             }
         }
 
@@ -157,19 +158,10 @@ namespace ConsoleClient.Views
                 Console.Write(message);
                 string value = Console.ReadLine()?.Trim() ?? string.Empty;
 
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Console.WriteLine("Polje ne sme biti prazno.");
-                    continue;
-                }
+                if (PosetilacValidator.IsValidText(value))
+                    return value;
 
-                if (value.Contains('|'))
-                {
-                    Console.WriteLine("Znak | nije dozvoljen.");
-                    continue;
-                }
-
-                return value;
+                Console.WriteLine("Polje ne sme biti prazno niti sadrzati znak |.");
             }
         }
 
@@ -184,12 +176,26 @@ namespace ConsoleClient.Views
                     "dd.MM.yyyy",
                     CultureInfo.InvariantCulture,
                     DateTimeStyles.None,
-                    out DateTime date) && date <= DateTime.Today)
+                    out DateTime date)
+                    && PosetilacValidator.IsValidBirthDate(date))
                 {
                     return date;
                 }
 
                 Console.WriteLine("Neispravan datum. Pokusajte ponovo.");
+            }
+        }
+
+        private string ReadMembershipCard(string message)
+        {
+            while (true)
+            {
+                string card = ReadRequiredString(message);
+
+                if (PosetilacValidator.IsValidMembershipCard(card))
+                    return card;
+
+                Console.WriteLine("Neispravan format. Primer: SK-1-2023.");
             }
         }
 
@@ -199,7 +205,8 @@ namespace ConsoleClient.Views
             {
                 Console.Write(message);
 
-                if (int.TryParse(Console.ReadLine(), out int year) && year > 0)
+                if (int.TryParse(Console.ReadLine(), out int year)
+                    && PosetilacValidator.IsValidMembershipYear(year))
                 {
                     return year;
                 }
@@ -215,29 +222,14 @@ namespace ConsoleClient.Views
                 Console.Write(message);
                 string value = Console.ReadLine()?.Trim().ToUpperInvariant() ?? "";
 
-                if (value == "R")
-                    return StatusPosetioca.R;
-
-                if (value == "V")
-                    return StatusPosetioca.V;
-
-                Console.WriteLine("Neispravan status. Unesite R ili V.");
-            }
-        }
-
-        private string ReadEmail(string message)
-        {
-            while (true)
-            {
-                string email = ReadRequiredString(message);
-
-                if (System.Net.Mail.MailAddress.TryCreate(email, out var address)
-                    && address.Address == email)
+                if (Enum.TryParse<StatusPosetioca>(value, out var status)
+                    && PosetilacValidator.IsValidStatus(status)
+                    && value == status.ToString())
                 {
-                    return email;
+                    return status;
                 }
 
-                Console.WriteLine("Neispravna email adresa.");
+                Console.WriteLine("Neispravan status. Unesite R ili V.");
             }
         }
 
@@ -247,13 +239,23 @@ namespace ConsoleClient.Views
             {
                 string phone = ReadRequiredString(message);
 
-                if (System.Text.RegularExpressions.Regex.IsMatch(
-                    phone, @"^\+?[0-9]{6,15}$"))
-                {
+                if (PosetilacValidator.IsValidPhone(phone))
                     return phone;
-                }
 
                 Console.WriteLine("Neispravan broj telefona.");
+            }
+        }
+
+        private string ReadEmail(string message)
+        {
+            while (true)
+            {
+                string email = ReadRequiredString(message);
+
+                if (PosetilacValidator.IsValidEmail(email))
+                    return email;
+
+                Console.WriteLine("Neispravna email adresa.");
             }
         }
     }
