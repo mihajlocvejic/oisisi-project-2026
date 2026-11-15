@@ -85,9 +85,12 @@ namespace ConsoleClient.Views
                 Console.Write("Sifra izdavaca: ");
                 knjiga.SifraIzdavaca = Console.ReadLine() ?? "";
 
-                Console.Write("Koliko autora ima knjiga? ");
+                Console.Write("Koliko autora ima knjiga (0 ako nema autora)? ");
                 int brojAutora = int.Parse(
                     Console.ReadLine() ?? "");
+
+                if (brojAutora < 0)
+                    throw new ArgumentException("Broj autora ne moze biti negativan.");
 
                 List<string> autori = new List<string>();
 
@@ -103,7 +106,7 @@ namespace ConsoleClient.Views
                 _controller.Add(knjiga, autori);
 
                 Console.WriteLine(
-                    "Knjiga i njeni autori su uspesno sacuvani.");
+                    "Knjiga je uspesno sacuvana.");
             }
             catch (Exception ex)
             {
