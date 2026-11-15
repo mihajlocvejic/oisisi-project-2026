@@ -81,7 +81,7 @@ namespace ConsoleClient.Views
                         case "1":
                             Adresa? nova = ReadAddress();
                             if (nova == null) { Console.WriteLine("Dodavanje otkazano."); break; }
-                            if (_controller.TryAdd(nova, out Adresa? created, out string addError))
+                            if (_controller.Add(nova, out Adresa? created, out string addError))
                                 Console.WriteLine($"Dodata adresa: {created!.Id}");
                             else Console.WriteLine(addError);
                             break;
@@ -91,13 +91,13 @@ namespace ConsoleClient.Views
                             Console.WriteLine($"Trenutna adresa: {existing}");
                             Adresa? edited = ReadAddress();
                             if (edited == null) { Console.WriteLine("Izmena otkazana."); break; }
-                            Console.WriteLine(_controller.TryUpdate(existing.Id, edited, out string updateError)
+                            Console.WriteLine(_controller.Update(existing.Id, edited, out string updateError)
                                 ? "Adresa izmenjena." : updateError);
                             break;
                         case "3":
                             Adresa? selected = SelectAddress();
                             if (selected == null) { Console.WriteLine("Brisanje otkazano."); break; }
-                            Console.WriteLine(_controller.TryRemove(selected.Id, out string removeError)
+                            Console.WriteLine(_controller.Remove(selected.Id, out string removeError)
                                 ? "Adresa obrisana." : removeError);
                             break;
                         case "4": ShowAll(); break;
