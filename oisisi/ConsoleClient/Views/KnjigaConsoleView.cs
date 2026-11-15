@@ -51,7 +51,7 @@ namespace ConsoleClient.Views
 
             Console.WriteLine(knjiga);
 
-            PrikaziAutore(isbn);
+            PrikaziAutore(knjiga.ISBN);
         }
 
 
@@ -85,9 +85,12 @@ namespace ConsoleClient.Views
                 Console.Write("Sifra izdavaca: ");
                 knjiga.SifraIzdavaca = Console.ReadLine() ?? "";
 
-                Console.Write("Koliko autora ima knjiga? ");
+                Console.Write("Koliko autora ima knjiga (0 ako nema autora)? ");
                 int brojAutora = int.Parse(
                     Console.ReadLine() ?? "");
+
+                if (brojAutora < 0)
+                    throw new ArgumentException("Broj autora ne moze biti negativan.");
 
                 List<string> autori = new List<string>();
 
@@ -103,7 +106,7 @@ namespace ConsoleClient.Views
                 _controller.Add(knjiga, autori);
 
                 Console.WriteLine(
-                    "Knjiga i njeni autori su uspesno sacuvani.");
+                    "Knjiga je uspesno sacuvana.");
             }
             catch (Exception ex)
             {
@@ -154,7 +157,7 @@ namespace ConsoleClient.Views
                 return;
             }
 
-            PrikaziAutore(isbn);
+            PrikaziAutore(knjiga.ISBN);
 
             Console.Write("Unesite broj licne karte autora za uklanjanje: ");
             string brojLicneKarte = Console.ReadLine() ?? "";
@@ -184,7 +187,7 @@ namespace ConsoleClient.Views
                 return;
             }
 
-            PrikaziAutore(isbn);
+            PrikaziAutore(knjiga.ISBN);
 
             Console.Write("Unesite broj licne karte autora za dodavanje: ");
             string brojLicneKarte = Console.ReadLine() ?? "";

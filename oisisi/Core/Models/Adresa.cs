@@ -7,6 +7,8 @@ namespace Core.Models
 {
     public class Adresa : ISerializable
     {
+        public int Id { get; set; }
+
         public string Ulica { get; set; } = string.Empty;
         public string Broj { get; set; } = string.Empty;
         public string Grad { get; set; } = string.Empty;
@@ -29,6 +31,7 @@ namespace Core.Models
         {
             return new string[]
             {
+                Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 Ulica,
                 Broj,
                 Grad,
@@ -38,16 +41,17 @@ namespace Core.Models
 
         public void FromCSV(string[] values)
         {
-            if (values.Length != 4)
+            if (values.Length != 5)
             {
                 throw new FormatException(
                     "Neispravan format adrese.");
             }
 
-            Ulica = values[0];
-            Broj = values[1];
-            Grad = values[2];
-            Drzava = values[3];
+            Id = int.Parse(values[0], System.Globalization.CultureInfo.InvariantCulture);
+            Ulica = values[1];
+            Broj = values[2];
+            Grad = values[3];
+            Drzava = values[4];
         }
 
         public override string ToString()

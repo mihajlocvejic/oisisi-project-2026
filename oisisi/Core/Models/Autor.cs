@@ -50,10 +50,7 @@ namespace Core.Models
                 Ime,
                 Prezime,
                 DatumRodjenja.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture),
-                Adresa.Ulica,
-                Adresa.Broj,
-                Adresa.Grad,
-                Adresa.Drzava,
+                Adresa.Id.ToString(CultureInfo.InvariantCulture),
                 Telefon,
                 Email,
                 BrojLicneKarte,
@@ -63,10 +60,10 @@ namespace Core.Models
 
         public void FromCSV(string[] values)
         {
-            if (values.Length != 11)
+            if (values.Length != 8)
             {
                 throw new FormatException(
-                    "Neispravan format podataka autora.");
+                    "Neispravan format autora. Ocekivano 8 polja sa ID-em adrese.");
             }
 
             Ime = values[0];
@@ -76,19 +73,11 @@ namespace Core.Models
                 values[2], "dd.MM.yyyy",
                 CultureInfo.InvariantCulture);
 
-            Adresa = new Adresa(
-                values[3],
-                values[4],
-                values[5],
-                values[6]
-            );
-
-            Telefon = values[7];
-            Email = values[8];
-            BrojLicneKarte = values[9];
-
-            GodineIskustva = int.Parse(
-                values[10], CultureInfo.InvariantCulture);
+            Adresa = new Adresa { Id = int.Parse(values[3], CultureInfo.InvariantCulture) };
+            Telefon = values[4];
+            Email = values[5];
+            BrojLicneKarte = values[6];
+            GodineIskustva = int.Parse(values[7], CultureInfo.InvariantCulture);
         }
 
         public override string ToString()

@@ -10,10 +10,12 @@ namespace ConsoleClient.Views
     public class PosetilacConsoleView
     {
         private readonly PosetilacController _controller;
+        private readonly AdresaConsoleView? _adrese;
 
-        public PosetilacConsoleView(PosetilacController controller)
+        public PosetilacConsoleView(PosetilacController controller, AdresaConsoleView? adrese = null)
         {
             _controller = controller;
+            _adrese = adrese;
         }
 
         public void AddPosetilac()
@@ -32,6 +34,8 @@ namespace ConsoleClient.Views
                 kontaktTelefon, email, brojClanskeKarte,
                 godinaClanstva, status, 0
             );
+
+            posetilac.Adresa = ReadAddress();
 
             if (_controller.Add(posetilac))
             {
@@ -72,6 +76,8 @@ namespace ConsoleClient.Views
                 kontaktTelefon, email, noviBrojClanskeKarte,
                 godinaClanstva, status, postojeci.ProsecnaOcena
             );
+
+            izmenjeni.Adresa = ReadAddress();
 
             if (_controller.Update(brojClanskeKarte, izmenjeni))
             {
@@ -257,6 +263,12 @@ namespace ConsoleClient.Views
 
                 Console.WriteLine("Neispravna email adresa.");
             }
+        }
+        private Adresa ReadAddress()
+        {
+            if (_adrese == null)
+                throw new InvalidOperationException("Prikaz adresa nije povezan sa ovim menijem.");
+            return _adrese.SelectAddress();
         }
     }
 }

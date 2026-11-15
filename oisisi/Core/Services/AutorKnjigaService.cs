@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Core.DAO;
 using Core.Models;
+using Core.Utils;
 using System.Linq;
 
 namespace Core.Services
@@ -43,7 +44,7 @@ namespace Core.Services
                 throw new InvalidOperationException(
                     "Autor je vec povezan sa ovom knjigom.");
 
-            _autorKnjigaDAO.Add(brojLicneKarte, isbn);
+            _autorKnjigaDAO.Add(autor.BrojLicneKarte, knjiga.ISBN);
         }
 
         public void UkloniAutoraSaKnjige(
@@ -57,13 +58,6 @@ namespace Core.Services
             if (!_autorKnjigaDAO.Exists(brojLicneKarte, isbn))
                 throw new InvalidOperationException(
                     "Veza autora i knjige ne postoji.");
-
-            List<string> autori =
-                _autorKnjigaDAO.GetAutoriZaKnjigu(isbn);
-
-            if (autori.Count <= 1)
-                throw new InvalidOperationException(
-                    "Knjiga mora imati najmanje jednog autora.");
 
             _autorKnjigaDAO.Delete(brojLicneKarte, isbn);
         }
@@ -88,16 +82,14 @@ namespace Core.Services
             if (knjiga == null)
                 throw new ArgumentNullException(nameof(knjiga));
 
-            if (brojeviLicnihKarata == null ||
-                brojeviLicnihKarata.Count == 0)
-                throw new ArgumentException(
-                    "Knjiga mora imati najmanje jednog autora.");
+            if (brojeviLicnihKarata == null)
+                throw new ArgumentNullException(nameof(brojeviLicnihKarata));
 
             if (brojeviLicnihKarata.Any(string.IsNullOrWhiteSpace))
                 throw new ArgumentException(
                     "Broj licne karte autora ne moze biti prazan.");
 
-            List<string> autori = brojeviLicnihKarata.Distinct().ToList();
+            List<string> autori = brojeviLicnihKarata.DistinctBy(EntityComparison.IdentifierKey).ToList();
 
             foreach (string brojLicneKarte in autori)
             {
@@ -202,19 +194,6 @@ namespace Core.Services
 
             List<string> knjige =
                 _autorKnjigaDAO.GetKnjigeZaAutora(brojLicneKarte);
-
-            // Prvo provjeravamo da nijedna knjiga ne ostane bez autora.
-            foreach (string isbn in knjige)
-            {
-                List<string> autori =
-                    _autorKnjigaDAO.GetAutoriZaKnjigu(isbn);
-
-                if (autori.Count <= 1)
-                {
-                    throw new InvalidOperationException(
-                        $"Autor ne moze biti obrisan jer je jedini autor knjige {isbn}.");
-                }
-            }
 
             // Uklanjamo sve veze autora sa knjigama.
             List<string> uklonjeneVeze = new List<string>();

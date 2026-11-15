@@ -57,7 +57,8 @@ namespace Core.Validation
 
         public static bool IsValid(Posetilac posetilac)
         {
-            return IsValidText(posetilac.Ime)
+            return AdresaValidator.IsValid(posetilac.Adresa)
+                && IsValidText(posetilac.Ime)
                 && IsValidText(posetilac.Prezime)
                 && IsValidBirthDate(posetilac.DatumRodjenja)
                 && IsValidPhone(posetilac.KontaktTelefon)

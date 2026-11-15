@@ -6,6 +6,8 @@ namespace Core.Models
 {
     public class Posetilac : ISerializable
     {
+        public Adresa Adresa { get; set; } = new Adresa();
+
         public string Ime { get; set; }
         public string Prezime { get; set; }
         public DateTime DatumRodjenja { get; set; }
@@ -52,12 +54,16 @@ namespace Core.Models
                 BrojClanskeKarte,
                 GodinaClanstva.ToString(),
                 Status.ToString(),
-                ProsecnaOcena.ToString(CultureInfo.InvariantCulture)
+                ProsecnaOcena.ToString(CultureInfo.InvariantCulture),
+                Adresa.Id.ToString(CultureInfo.InvariantCulture)
             };
         }
 
         public void FromCSV(string[] values)
         {
+            if (values.Length != 10)
+                throw new FormatException("Neispravan format posetioca. Ocekivano 10 polja sa ID-em adrese.");
+
             Ime = values[0];
             Prezime = values[1];
             DatumRodjenja = DateTime.ParseExact(values[2], "yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -67,13 +73,14 @@ namespace Core.Models
             GodinaClanstva = int.Parse(values[6]);
             Status = Enum.Parse<StatusPosetioca>(values[7]);
             ProsecnaOcena = double.Parse(values[8], CultureInfo.InvariantCulture);
+            Adresa = new Adresa { Id = int.Parse(values[9], CultureInfo.InvariantCulture) };
         }
 
         public override string ToString()
         {
             return $"{BrojClanskeKarte} | {Ime} {Prezime} | " +
                    $"{DatumRodjenja:dd.MM.yyyy.} | {KontaktTelefon} | " +
-                   $"{Email} | {GodinaClanstva} | {Status} | {ProsecnaOcena:F2}";
+                   $"{Email} | {Adresa} | {GodinaClanstva} | {Status} | {ProsecnaOcena:F2}";
         }
     }
 }
