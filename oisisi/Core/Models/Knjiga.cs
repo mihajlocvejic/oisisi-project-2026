@@ -69,43 +69,35 @@ namespace Core.Models
         {
             return new string[]
             {
-                ISBN,
-                Naziv,
-                Zanr,
-                GodinaIzdanja.ToString(CultureInfo.InvariantCulture),
-                Cena.ToString(CultureInfo.InvariantCulture),
-                BrojStrana.ToString(CultureInfo.InvariantCulture),
-                SifraIzdavaca,
-                string.Join(";", KupciClanskeKarte),
-                string.Join(";", ListaZeljaClanskeKarte)
+        ISBN,
+        Naziv,
+        Zanr,
+        GodinaIzdanja.ToString(CultureInfo.InvariantCulture),
+        Cena.ToString(CultureInfo.InvariantCulture),
+        BrojStrana.ToString(CultureInfo.InvariantCulture),
+        SifraIzdavaca
             };
         }
 
         public void FromCSV(string[] values)
         {
-            if (values.Length != 9)
-            {
-                throw new FormatException(
-                    "Neispravan format podataka knjige.");
-            }
+            if (values.Length != 7)
+                throw new FormatException("Neispravan format podataka knjige.");
 
             if (_isbn != null)
-                throw new InvalidOperationException("Postojeca knjiga se ne moze ponovo ucitavati.");
+                throw new InvalidOperationException(
+                    "Postojeca knjiga se ne moze ponovo ucitavati.");
 
-            int godina = int.Parse(values[3], CultureInfo.InvariantCulture);
-            decimal cena = decimal.Parse(values[4], CultureInfo.InvariantCulture);
-            int brojStrana = int.Parse(values[5], CultureInfo.InvariantCulture);
-            List<string> kupci = ParseList(values[7]);
-            List<string> zelje = ParseList(values[8]);
             ISBN = values[0];
             Naziv = values[1];
             Zanr = values[2];
-            GodinaIzdanja = godina;
-            Cena = cena;
-            BrojStrana = brojStrana;
+            GodinaIzdanja = int.Parse(values[3], CultureInfo.InvariantCulture);
+            Cena = decimal.Parse(values[4], CultureInfo.InvariantCulture);
+            BrojStrana = int.Parse(values[5], CultureInfo.InvariantCulture);
             SifraIzdavaca = values[6];
-            KupciClanskeKarte = kupci;
-            ListaZeljaClanskeKarte = zelje;
+
+            KupciClanskeKarte = new List<string>();
+            ListaZeljaClanskeKarte = new List<string>();
         }
 
         private static List<string> ParseList(string value)

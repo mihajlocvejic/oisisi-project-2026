@@ -12,10 +12,13 @@ namespace Core.Validation
                 && !value.Contains('\r');
         }
 
-        public static bool IsValid(Izdavac izdavac)
+        public static bool IsValid(Izdavac? izdavac)
         {
-            return IsValidText(izdavac.Sifra)
-                && IsValidText(izdavac.Naziv);
+            return izdavac != null
+                && IsValidText(izdavac.Sifra)
+                && IsValidText(izdavac.Naziv)
+                && (izdavac.SefIzdavaca == null
+                    || izdavac.SefIzdavaca.GodineIskustva >= 5);
         }
     }
 }

@@ -36,23 +36,26 @@ namespace Core.Models
         {
             return new string[]
             {
-                Id.ToString(),
+                Id.ToString(CultureInfo.InvariantCulture),
                 BrojClanskeKarte,
                 ISBN,
                 DatumKupovine.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                Ocena.ToString(),
+                Ocena.ToString(CultureInfo.InvariantCulture),
                 Komentar
             };
         }
 
         public void FromCSV(string[] values)
         {
-            Id = int.Parse(values[0]);
+            if (values.Length != 6)
+                throw new FormatException("Neispravan format kupovine. Ocekivano 6 polja.");
+
+            Id = int.Parse(values[0], CultureInfo.InvariantCulture);
             BrojClanskeKarte = values[1];
             ISBN = values[2];
             DatumKupovine = DateTime.ParseExact(
                 values[3], "yyyy-MM-dd", CultureInfo.InvariantCulture);
-            Ocena = int.Parse(values[4]);
+            Ocena = int.Parse(values[4], CultureInfo.InvariantCulture);
             Komentar = values[5];
         }
 

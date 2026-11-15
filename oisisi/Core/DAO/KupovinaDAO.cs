@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Core.Models;
 using Core.Serialization;
+using Core.Utils;
+using System.Linq;
 
 namespace Core.DAO
 {
@@ -42,34 +44,39 @@ namespace Core.DAO
             );
 
             _kupovine.Add(nova);
-            _serializer.ToCSV(_fileName, _kupovine);
+            Save();
         }
 
         public bool Update(int id, Kupovina kupovina)
         {
-            int index = _kupovine.FindIndex(k => k.Id == id);
+            Kupovina? postojeca = GetById(id);
 
-            if (index == -1)
+            if (postojeca == null)
                 return false;
 
             if (kupovina.Id != id)
                 return false;
 
-            _kupovine[index] = kupovina;
-            _serializer.ToCSV(_fileName, _kupovine);
+            postojeca.BrojClanskeKarte = kupovina.BrojClanskeKarte;
+            postojeca.ISBN = kupovina.ISBN;
+            postojeca.DatumKupovine = kupovina.DatumKupovine;
+            postojeca.Ocena = kupovina.Ocena;
+            postojeca.Komentar = kupovina.Komentar;
+
+            Save();
 
             return true;
         }
 
         public bool Remove(int id)
         {
-            int index = _kupovine.FindIndex(k => k.Id == id);
+            Kupovina? kupovina = GetById(id);
 
-            if (index == -1)
+            if (kupovina == null)
                 return false;
 
-            _kupovine.RemoveAt(index);
-            _serializer.ToCSV(_fileName, _kupovine);
+            _kupovine.Remove(kupovina);
+            Save();
 
             return true;
         }
@@ -77,6 +84,48 @@ namespace Core.DAO
         public List<Kupovina> GetAll()
         {
             return new List<Kupovina>(_kupovine);
+        }
+
+        public Kupovina? GetById(int id)
+        {
+            return _kupovine.FirstOrDefault(k => k.Id == id);
+        }
+
+        public List<Kupovina> GetByPosetilac(string brojClanskeKarte)
+        {
+            return _kupovine.Where(k =>
+                EntityComparison.SameIdentifier(
+                    k.BrojClanskeKarte, brojClanskeKarte)).ToList();
+        }
+
+        public List<Kupovina> GetByISBN(string isbn)
+        {
+            return _kupovine.Where(k =>
+                EntityComparison.SameISBN(k.ISBN, isbn)).ToList();
+        }
+
+        private void Save()
+        {
+            _serializer.ToCSV(_fileName, _kupovine);
+        }
+
+        public void RemoveByPosetilac(string brojClanskeKarte)
+        {
+            int removed = _kupovine.RemoveAll(k =>
+                EntityComparison.SameIdentifier(
+                    k.BrojClanskeKarte, brojClanskeKarte));
+
+            if (removed > 0)
+                Save();
+        }
+
+        public void RemoveByISBN(string isbn)
+        {
+            int removed = _kupovine.RemoveAll(k =>
+                EntityComparison.SameISBN(k.ISBN, isbn));
+
+            if (removed > 0)
+                Save();
         }
     }
 }

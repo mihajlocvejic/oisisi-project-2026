@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using Core.Interfaces;
+using System.Linq;
+using System;
 
 namespace Core.Models
 {
@@ -17,10 +19,13 @@ namespace Core.Models
             Naziv = string.Empty;
         }
 
-        public Izdavac(string sifra, string naziv)
+        public Izdavac(string sifra, string naziv,
+                       Autor? sefIzdavaca, List<Autor> autori)
         {
             Sifra = sifra;
             Naziv = naziv;
+            SefIzdavaca = sefIzdavaca;
+            Autori = new List<Autor>(autori);
         }
 
         public string[] ToCSV()
@@ -28,18 +33,42 @@ namespace Core.Models
             return new string[]
             {
                 Sifra,
-                Naziv
+                Naziv,
+                SefIzdavaca?.BrojLicneKarte ?? string.Empty,
+                string.Join(";", Autori.Select(a => a.BrojLicneKarte))
             };
         }
 
         public void FromCSV(string[] values)
         {
+            if (values.Length != 4)
+                throw new FormatException(
+                    "Neispravan format izdavaca. Ocekivano 4 polja.");
+
             Sifra = values[0];
             Naziv = values[1];
+
+            SefIzdavaca = string.IsNullOrEmpty(values[2])
+                ? null
+                : new Autor { BrojLicneKarte = values[2] };
+
+            Autori = string.IsNullOrEmpty(values[3])
+                ? new List<Autor>()
+                : values[3].Split(';')
+                    .Select(broj => new Autor { BrojLicneKarte = broj })
+                    .ToList();
         }
+
         public override string ToString()
         {
-            return $"{Sifra} | {Naziv}";
+            string sef = SefIzdavaca == null
+                ? "Nije postavljen"
+                : $"{SefIzdavaca.Ime} {SefIzdavaca.Prezime}";
+
+            return $"{Sifra} | {Naziv} | " +
+                   $"Sef: {sef} | " +
+                   $"Broj autora: {Autori.Count} | " +
+                   $"Broj knjiga: {Knjige.Count}";
         }
 
     }

@@ -25,13 +25,14 @@ namespace Core.Validation
         {
             return IsValidText(email)
                 && MailAddress.TryCreate(email, out var address)
-                && address.Address == email;
+                && address.Address == email
+                && address.Host.Contains('.');
         }
 
         public static bool IsValidBirthDate(DateTime date)
         {
             return date != DateTime.MinValue
-                && date <= DateTime.Today;
+                && date.Date <= DateTime.Today;
         }
 
         public static bool IsValidMembershipCard(string card)
@@ -55,9 +56,10 @@ namespace Core.Validation
             return rating >= 0 && rating <= 5;
         }
 
-        public static bool IsValid(Posetilac posetilac)
+        public static bool IsValid(Posetilac? posetilac)
         {
-            return AdresaValidator.IsValid(posetilac.Adresa)
+            return posetilac != null
+                && AdresaValidator.IsValid(posetilac.Adresa)
                 && IsValidText(posetilac.Ime)
                 && IsValidText(posetilac.Prezime)
                 && IsValidBirthDate(posetilac.DatumRodjenja)

@@ -16,8 +16,7 @@ namespace Core.Validation
         public static bool IsValid(Knjiga? knjiga) => knjiga != null
             && IsValidISBN(knjiga.ISBN) && IsValidText(knjiga.Naziv) && IsValidText(knjiga.Zanr)
             && IsValidPublisherCode(knjiga.SifraIzdavaca) && IsValidYear(knjiga.GodinaIzdanja)
-            && IsValidPrice(knjiga.Cena) && IsValidPageCount(knjiga.BrojStrana)
-            && IsValidCardList(knjiga.KupciClanskeKarte) && IsValidCardList(knjiga.ListaZeljaClanskeKarte);
+            && IsValidPrice(knjiga.Cena) && IsValidPageCount(knjiga.BrojStrana);
 
         public static void Validate(Knjiga knjiga)
         {

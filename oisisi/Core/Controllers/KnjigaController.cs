@@ -10,38 +10,105 @@ namespace Core.Controllers
     {
         private readonly KnjigaDAO _dao;
         private readonly AutorKnjigaService _service;
+        private readonly IzdavacDAO _izdavacDAO;
+        private readonly KupovinaDAO _kupovinaDAO;
+        private readonly PosetilacDAO _posetilacDAO;
 
-        public KnjigaController(KnjigaDAO dao, AutorKnjigaService service)
+        public KnjigaController(
+            KnjigaDAO dao,
+            AutorKnjigaService service,
+            KupovinaDAO kupovinaDAO,
+            PosetilacDAO posetilacDAO,
+            IzdavacDAO izdavacDAO)
         {
             ArgumentNullException.ThrowIfNull(dao);
             ArgumentNullException.ThrowIfNull(service);
+            ArgumentNullException.ThrowIfNull(kupovinaDAO);
+            ArgumentNullException.ThrowIfNull(posetilacDAO);
+            ArgumentNullException.ThrowIfNull(izdavacDAO);
+
             _dao = dao;
             _service = service;
+            _kupovinaDAO = kupovinaDAO;
+            _posetilacDAO = posetilacDAO;
+            _izdavacDAO = izdavacDAO;
         }
 
         public bool Add(Knjiga? knjiga, List<string>? brojeviLicnihKarata)
         {
-            if (!KnjigaValidator.IsValid(knjiga) || brojeviLicnihKarata == null
-                || brojeviLicnihKarata.Any(id => !AutorValidator.IsValidIdentityCard(id))) return false;
-            try { _service.DodajKnjigu(knjiga!, brojeviLicnihKarata); return true; }
+            if (!KnjigaValidator.IsValid(knjiga)
+                || brojeviLicnihKarata == null
+                || brojeviLicnihKarata.Any(id =>
+                    !AutorValidator.IsValidIdentityCard(id)))
+                return false;
+
+            if (_izdavacDAO.GetById(knjiga!.SifraIzdavaca) == null)
+                return false;
+
+            try
+            {
+                _service.DodajKnjigu(knjiga!, brojeviLicnihKarata);
+                RefreshPublisherBooks();
+                return true;
+            }
             catch (ArgumentException) { return false; }
             catch (InvalidOperationException) { return false; }
         }
 
         public bool Update(string isbn, Knjiga? knjiga)
         {
-            if (!KnjigaValidator.IsValidISBN(isbn) || !KnjigaValidator.IsValid(knjiga)
-                || !EntityComparison.SameISBN(isbn, knjiga!.ISBN) || _dao.GetByISBN(isbn) == null) return false;
-            try { _dao.Update(knjiga); return true; }
+            if (!KnjigaValidator.IsValidISBN(isbn)
+                || !KnjigaValidator.IsValid(knjiga)
+                || !EntityComparison.SameISBN(isbn, knjiga!.ISBN)
+                || _dao.GetByISBN(isbn) == null)
+                return false;
+
+            if (_izdavacDAO.GetById(knjiga!.SifraIzdavaca) == null)
+                return false;
+
+            try
+            {
+                _dao.Update(knjiga!);
+                RefreshPublisherBooks();
+                return true;
+            }
             catch (ArgumentException) { return false; }
             catch (InvalidOperationException) { return false; }
         }
 
         public bool Remove(string isbn)
         {
-            if (!KnjigaValidator.IsValidISBN(isbn) || _dao.GetByISBN(isbn) == null) return false;
-            try { _service.ObrisiKnjigu(isbn); return true; }
-            catch (InvalidOperationException) { return false; }
+            if (!KnjigaValidator.IsValidISBN(isbn)
+                || _dao.GetByISBN(isbn) == null)
+                return false;
+
+            try
+            {
+                _service.ObrisiKnjigu(isbn);
+
+                _kupovinaDAO.RemoveByISBN(isbn);
+
+                foreach (Posetilac posetilac in _posetilacDAO.GetAll())
+                {
+                    posetilac.ListaZeljaISBN.RemoveAll(k =>
+                        EntityComparison.SameISBN(k, isbn));
+
+                    posetilac.Kupovine = _kupovinaDAO.GetByPosetilac(
+                        posetilac.BrojClanskeKarte);
+
+                    posetilac.IzracunajProsecnuOcenu();
+                }
+
+                _posetilacDAO.Save();
+
+                RefreshPublisherBooks();
+
+                return true;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
         }
 
         public Knjiga? GetByISBN(string isbn) => _dao.GetByISBN(isbn);
@@ -63,6 +130,17 @@ namespace Core.Controllers
             try { _service.DodajAutoraNaKnjigu(brojLicneKarte, isbn); return true; }
             catch (ArgumentException) { return false; }
             catch (InvalidOperationException) { return false; }
+        }
+
+        private void RefreshPublisherBooks()
+        {
+            foreach (Izdavac izdavac in _izdavacDAO.GetAll())
+            {
+                izdavac.Knjige = _dao.GetAll()
+                    .Where(k => EntityComparison.SameIdentifier(
+                        k.SifraIzdavaca, izdavac.Sifra))
+                    .ToList();
+            }
         }
     }
 }
