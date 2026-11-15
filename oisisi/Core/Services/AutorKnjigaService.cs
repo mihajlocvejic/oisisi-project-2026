@@ -24,6 +24,8 @@ namespace Core.Services
             _autorKnjigaDAO = autorKnjigaDAO;
         }
 
+        public bool AutorPostoji(string brojLicneKarte) => _autorDAO.GetById(brojLicneKarte) != null;
+
         public void DodajAutoraNaKnjigu(
             string brojLicneKarte,
             string isbn)
@@ -119,7 +121,7 @@ namespace Core.Services
                         _autorKnjigaDAO.Delete(brojLicneKarte, knjiga.ISBN);
                 }
 
-                _knjigaDAO.Delete(knjiga.ISBN);
+                _knjigaDAO.Remove(knjiga.ISBN);
                 throw;
             }
         }
@@ -149,7 +151,7 @@ namespace Core.Services
                 }
 
                 // Kada su veze uklonjene, brisemo knjigu.
-                _knjigaDAO.Delete(isbn);
+                _knjigaDAO.Remove(isbn);
             }
             catch
             {
