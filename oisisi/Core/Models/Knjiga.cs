@@ -8,7 +8,19 @@ namespace Core.Models
 {
     public class Knjiga : ISerializable
     {
-        public string ISBN { get; set; }
+        private string? _isbn;
+        public string ISBN
+        {
+            get => _isbn ?? string.Empty;
+            set
+            {
+                if (_isbn != null)
+                    throw new InvalidOperationException("ISBN se ne moze menjati nakon postavljanja.");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("ISBN je obavezan.");
+                _isbn = value;
+            }
+        }
         public string Naziv { get; set; }
         public string Zanr { get; set; }
         public int GodinaIzdanja { get; set; }
@@ -24,7 +36,6 @@ namespace Core.Models
 
         public Knjiga()
         {
-            ISBN = string.Empty;
             Naziv = string.Empty;
             Zanr = string.Empty;
             SifraIzdavaca = string.Empty;
@@ -39,7 +50,6 @@ namespace Core.Models
             int godinaIzdanja,
             decimal cena,
             int brojStrana,
-            List<string> autoriLicneKarte,
             string sifraIzdavaca,
             List<string> kupciClanskeKarte,
             List<string> listaZeljaClanskeKarte)
@@ -51,8 +61,8 @@ namespace Core.Models
             Cena = cena;
             BrojStrana = brojStrana;
             SifraIzdavaca = sifraIzdavaca;
-            KupciClanskeKarte = kupciClanskeKarte;
-            ListaZeljaClanskeKarte = listaZeljaClanskeKarte;
+            KupciClanskeKarte = new List<string>(kupciClanskeKarte);
+            ListaZeljaClanskeKarte = new List<string>(listaZeljaClanskeKarte);
         }
 
         public string[] ToCSV()
@@ -79,22 +89,23 @@ namespace Core.Models
                     "Neispravan format podataka knjige.");
             }
 
+            if (_isbn != null)
+                throw new InvalidOperationException("Postojeca knjiga se ne moze ponovo ucitavati.");
+
+            int godina = int.Parse(values[3], CultureInfo.InvariantCulture);
+            decimal cena = decimal.Parse(values[4], CultureInfo.InvariantCulture);
+            int brojStrana = int.Parse(values[5], CultureInfo.InvariantCulture);
+            List<string> kupci = ParseList(values[7]);
+            List<string> zelje = ParseList(values[8]);
             ISBN = values[0];
             Naziv = values[1];
             Zanr = values[2];
-
-            GodinaIzdanja = int.Parse(
-                values[3], CultureInfo.InvariantCulture);
-
-            Cena = decimal.Parse(
-                values[4], CultureInfo.InvariantCulture);
-
-            BrojStrana = int.Parse(
-                values[5], CultureInfo.InvariantCulture);
-
+            GodinaIzdanja = godina;
+            Cena = cena;
+            BrojStrana = brojStrana;
             SifraIzdavaca = values[6];
-            KupciClanskeKarte = ParseList(values[7]);
-            ListaZeljaClanskeKarte = ParseList(values[8]);
+            KupciClanskeKarte = kupci;
+            ListaZeljaClanskeKarte = zelje;
         }
 
         private static List<string> ParseList(string value)
@@ -108,7 +119,7 @@ namespace Core.Models
         {
             return $"{ISBN} | {Naziv} | {Zanr} | " +
                    $"{GodinaIzdanja} | {Cena:F2} | " +
-                   $"{BrojStrana} strana";
+                   $"{BrojStrana} strana | Izdavac (sifra): {SifraIzdavaca}";
         }
     }
 }

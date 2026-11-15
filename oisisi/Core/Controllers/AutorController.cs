@@ -1,8 +1,8 @@
-﻿
-using Core.DAO;
+﻿using Core.DAO;
 using Core.Models;
 using Core.Services;
-using System.Collections.Generic;
+using Core.Utils;
+using Core.Validation;
 
 namespace Core.Controllers
 {
@@ -13,47 +13,42 @@ namespace Core.Controllers
 
         public AutorController(AutorDAO dao, AutorKnjigaService service)
         {
+            ArgumentNullException.ThrowIfNull(dao);
+            ArgumentNullException.ThrowIfNull(service);
             _dao = dao;
             _service = service;
         }
 
-        public void Add(Autor autor)
+        public bool Add(Autor? autor)
         {
-            _dao.Add(autor);
+            if (!AutorValidator.IsValid(autor)) return false;
+            try { _dao.Add(autor!); return true; }
+            catch (ArgumentException) { return false; }
+            catch (InvalidOperationException) { return false; }
         }
 
-        public bool Update(string brojLicneKarte, Autor autor)
+        public bool Update(string brojLicneKarte, Autor? autor)
         {
-            Autor? existing = _dao.GetById(brojLicneKarte);
-
-            if (existing == null)
-                return false;
-
-            // Trenutni DAO pronalazi autora po broju licne karte.
-            // Zato taj identifikator za sada ne menjamo.
-            autor.BrojLicneKarte = brojLicneKarte;
-
-            _dao.Update(autor);
-            return true;
+            if (!AutorValidator.IsValidIdentityCard(brojLicneKarte)
+                || !AutorValidator.IsValid(autor)
+                || !EntityComparison.SameIdentifier(brojLicneKarte, autor!.BrojLicneKarte)
+                || _dao.GetById(brojLicneKarte) == null) return false;
+            try { _dao.Update(autor); return true; }
+            catch (ArgumentException) { return false; }
+            catch (InvalidOperationException) { return false; }
         }
 
         public bool Remove(string brojLicneKarte)
         {
-            if (_dao.GetById(brojLicneKarte) == null)
-                return false;
-
-            _service.ObrisiAutora(brojLicneKarte);
-            return true;
+            if (!AutorValidator.IsValidIdentityCard(brojLicneKarte)
+                || _dao.GetById(brojLicneKarte) == null) return false;
+            try { _service.ObrisiAutora(brojLicneKarte); return true; }
+            catch (InvalidOperationException) { return false; }
         }
 
-        public Autor? GetById(string brojLicneKarte)
-        {
-            return _dao.GetById(brojLicneKarte);
-        }
+        public Autor? GetById(string brojLicneKarte) =>
+            AutorValidator.IsValidIdentityCard(brojLicneKarte) ? _dao.GetById(brojLicneKarte) : null;
 
-        public List<Autor> GetAll()
-        {
-            return _dao.GetAll();
-        }
+        public List<Autor> GetAll() => _dao.GetAll();
     }
 }
