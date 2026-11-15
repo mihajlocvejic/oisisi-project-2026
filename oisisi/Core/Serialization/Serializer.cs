@@ -10,6 +10,11 @@ namespace Core.Serialization
 
         public void ToCSV(string fileName, List<T> objects)
         {
+            string? directory = Path.GetDirectoryName(fileName);
+
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+
             using StreamWriter writer = new StreamWriter(fileName);
 
             foreach (T obj in objects)
