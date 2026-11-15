@@ -14,13 +14,9 @@ namespace Core.Validation
                 throw new ArgumentException(
                     "ISBN mora biti ispravan ISBN-10 ili ISBN-13.");
 
-            if (string.IsNullOrWhiteSpace(knjiga.Naziv))
-                throw new ArgumentException(
-                    "Naziv knjige je obavezan.");
-
-            if (string.IsNullOrWhiteSpace(knjiga.Zanr))
-                throw new ArgumentException(
-                    "Zanr knjige je obavezan.");
+            CsvFieldValidator.ValidateRequired(knjiga.Naziv, "Naziv knjige");
+            CsvFieldValidator.ValidateRequired(knjiga.Zanr, "Zanr knjige");
+            CsvFieldValidator.ValidateRequired(knjiga.SifraIzdavaca, "Sifra izdavaca");
 
             if (knjiga.GodinaIzdanja < 1450 ||
                 knjiga.GodinaIzdanja > DateTime.Now.Year)
@@ -35,9 +31,13 @@ namespace Core.Validation
                 throw new ArgumentException(
                     "Broj strana mora biti veci od nule.");
 
-            if (string.IsNullOrWhiteSpace(knjiga.SifraIzdavaca))
-                throw new ArgumentException(
-                    "Sifra izdavaca je obavezna.");
+            if (knjiga.KupciClanskeKarte == null
+                || knjiga.KupciClanskeKarte.Any(value => !CsvFieldValidator.IsValidListItem(value)))
+                throw new ArgumentException("Lista kupaca mora sadrzati neprazne brojeve kartica bez |, ; i novih redova.");
+
+            if (knjiga.ListaZeljaClanskeKarte == null
+                || knjiga.ListaZeljaClanskeKarte.Any(value => !CsvFieldValidator.IsValidListItem(value)))
+                throw new ArgumentException("Lista zelja mora sadrzati neprazne brojeve kartica bez |, ; i novih redova.");
         }
     }
 }

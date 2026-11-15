@@ -11,11 +11,11 @@ namespace Core.Validation
             if (autor == null)
                 throw new ArgumentNullException(nameof(autor));
 
-            if (string.IsNullOrWhiteSpace(autor.Ime))
-                throw new ArgumentException("Ime autora je obavezno.");
-
-            if (string.IsNullOrWhiteSpace(autor.Prezime))
-                throw new ArgumentException("Prezime autora je obavezno.");
+            CsvFieldValidator.ValidateRequired(autor.Ime, "Ime autora");
+            CsvFieldValidator.ValidateRequired(autor.Prezime, "Prezime autora");
+            CsvFieldValidator.ValidateRequired(autor.Telefon, "Telefon autora");
+            CsvFieldValidator.ValidateRequired(autor.Email, "Email autora");
+            CsvFieldValidator.ValidateRequired(autor.BrojLicneKarte, "Broj licne karte");
 
             if (autor.DatumRodjenja == default ||
                 autor.DatumRodjenja.Date > DateTime.Today)
@@ -33,9 +33,6 @@ namespace Core.Validation
                 email.Address != autor.Email ||
                 !email.Host.Contains('.'))
                 throw new ArgumentException("Email adresa nije ispravna.");
-
-            if (string.IsNullOrWhiteSpace(autor.BrojLicneKarte))
-                throw new ArgumentException("Broj licne karte je obavezan.");
 
             if (autor.GodineIskustva < 0)
                 throw new ArgumentException(

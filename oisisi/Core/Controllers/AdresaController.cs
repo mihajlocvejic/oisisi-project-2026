@@ -28,5 +28,65 @@ namespace Core.Controllers
                 throw new InvalidOperationException("Adresa se koristi. Prvo promenite adresu osobe ili obrisite osobu.");
             return _dao.Remove(id);
         }
+        // Ocekivani neuspesi dostupni su i konzoli i buducem WPF klijentu.
+        // Postojece CRUD metode ostaju dostupne radi kompatibilnosti.
+        public bool TryAdd(Adresa? adresa, out Adresa? created, out string error)
+        {
+            created = null;
+            if (adresa == null)
+            {
+                error = "Adresa je obavezna.";
+                return false;
+            }
+            try
+            {
+                created = Add(adresa);
+                error = string.Empty;
+                return true;
+            }
+            catch (ArgumentException ex) { error = ex.Message; return false; }
+            catch (InvalidOperationException ex) { error = ex.Message; return false; }
+        }
+
+        public bool TryUpdate(int id, Adresa? adresa, out string error)
+        {
+            if (id <= 0 || adresa == null)
+            {
+                error = "Unesite pozitivan ID i podatke adrese.";
+                return false;
+            }
+            try
+            {
+                if (!Update(id, adresa))
+                {
+                    error = "Adresa nije pronadjena.";
+                    return false;
+                }
+                error = string.Empty;
+                return true;
+            }
+            catch (ArgumentException ex) { error = ex.Message; return false; }
+            catch (InvalidOperationException ex) { error = ex.Message; return false; }
+        }
+
+        public bool TryRemove(int id, out string error)
+        {
+            if (id <= 0)
+            {
+                error = "ID mora biti pozitivan ceo broj.";
+                return false;
+            }
+            try
+            {
+                if (!Remove(id))
+                {
+                    error = "Adresa nije pronadjena.";
+                    return false;
+                }
+                error = string.Empty;
+                return true;
+            }
+            catch (InvalidOperationException ex) { error = ex.Message; return false; }
+        }
     }
 }

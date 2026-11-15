@@ -32,7 +32,12 @@ namespace ConsoleClient.Views
                 "dd.MM.yyyy",
                 CultureInfo.InvariantCulture);
 
-            Adresa adresa = ReadAddress();
+            Adresa? adresa = ReadAddress();
+            if (adresa == null)
+            {
+                Console.WriteLine("Dodavanje autora otkazano.");
+                return;
+            }
 
             Console.Write("Telefon: ");
             string telefon = Console.ReadLine() ?? string.Empty;
@@ -123,7 +128,13 @@ namespace ConsoleClient.Views
                     CultureInfo.InvariantCulture
                 );
 
-                autor.Adresa = ReadAddress();
+                Adresa? adresa = ReadAddress();
+                if (adresa == null)
+                {
+                    Console.WriteLine("Izmena autora otkazana.");
+                    return;
+                }
+                autor.Adresa = adresa;
 
                 Console.Write("Telefon: ");
                 autor.Telefon = Console.ReadLine() ?? string.Empty;
@@ -153,10 +164,13 @@ namespace ConsoleClient.Views
             }
         }
 
-        private Adresa ReadAddress()
+        private Adresa? ReadAddress()
         {
             if (_adrese == null)
-                throw new InvalidOperationException("Prikaz adresa nije povezan sa ovim menijem.");
+            {
+                Console.WriteLine("Prikaz adresa nije povezan sa ovim menijem.");
+                return null;
+            }
             return _adrese.SelectAddress();
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Core.Controllers;
 using Core.Models;
+using Core.Validation;
 
 namespace ConsoleClient.Views
 {
@@ -15,27 +16,54 @@ namespace ConsoleClient.Views
             foreach (Adresa adresa in adrese) Console.WriteLine($"{adresa.Id} | {adresa}");
         }
 
-        public Adresa SelectAddress()
+        public Adresa? SelectAddress()
         {
+            if (_controller.GetAll().Count == 0)
+            {
+                Console.WriteLine("Nema adresa. Prvo dodajte adresu u meniju Adrese.");
+                return null;
+            }
             ShowAll();
-            Console.Write("ID adrese (prvo je dodajte u meniju Adrese): ");
-            int id = ReadId();
-            return _controller.GetById(id) ?? throw new ArgumentException("Adresa ne postoji.");
+            while (true)
+            {
+                int? id = ReadId();
+                if (id == null) return null;
+                Adresa? adresa = _controller.GetById(id.Value);
+                if (adresa != null) return adresa;
+                Console.WriteLine("Adresa ne postoji. Izaberite ID iz prikazane liste.");
+            }
         }
 
-        private static int ReadId()
+        private static int? ReadId()
         {
-            if (!int.TryParse(Console.ReadLine(), out int id) || id <= 0)
-                throw new ArgumentException("ID mora biti pozitivan ceo broj.");
-            return id;
+            while (true)
+            {
+                Console.Write("ID adrese (0 za odustajanje): ");
+                string? input = Console.ReadLine();
+                if (input == null || input.Trim() == "0") return null;
+                if (int.TryParse(input, out int id) && id > 0) return id;
+                Console.WriteLine("ID mora biti pozitivan ceo broj.");
+            }
         }
 
-        private static Adresa ReadAddress()
+        private static string? ReadText(string label)
         {
-            Console.Write("Ulica: "); string ulica = Console.ReadLine() ?? "";
-            Console.Write("Broj: "); string broj = Console.ReadLine() ?? "";
-            Console.Write("Grad: "); string grad = Console.ReadLine() ?? "";
-            Console.Write("Drzava: "); string drzava = Console.ReadLine() ?? "";
+            while (true)
+            {
+                Console.Write($"{label} (/nazad za odustajanje): ");
+                string? input = Console.ReadLine();
+                if (input == null || input.Trim().Equals("/nazad", StringComparison.OrdinalIgnoreCase)) return null;
+                if (AdresaValidator.IsValidText(input)) return input.Trim();
+                Console.WriteLine("Polje je obavezno i ne sme sadrzati | ili novi red. Pokusajte ponovo.");
+            }
+        }
+
+        private static Adresa? ReadAddress()
+        {
+            string? ulica = ReadText("Ulica"); if (ulica == null) return null;
+            string? broj = ReadText("Broj"); if (broj == null) return null;
+            string? grad = ReadText("Grad"); if (grad == null) return null;
+            string? drzava = ReadText("Drzava"); if (drzava == null) return null;
             return new Adresa(ulica, broj, grad, drzava);
         }
 
@@ -45,25 +73,40 @@ namespace ConsoleClient.Views
             {
                 Console.WriteLine("\n--- Adrese ---\n1. Dodaj\n2. Izmeni\n3. Obrisi\n4. Prikazi\n0. Nazad");
                 string? izbor = Console.ReadLine();
-                if (izbor == null || izbor == "0") return;
+                if (izbor == null || izbor.Trim() == "0") return;
                 try
                 {
-                    switch (izbor)
+                    switch (izbor.Trim())
                     {
-                        case "1": Console.WriteLine($"Dodata adresa: {_controller.Add(ReadAddress()).Id}"); break;
+                        case "1":
+                            Adresa? nova = ReadAddress();
+                            if (nova == null) { Console.WriteLine("Dodavanje otkazano."); break; }
+                            if (_controller.TryAdd(nova, out Adresa? created, out string addError))
+                                Console.WriteLine($"Dodata adresa: {created!.Id}");
+                            else Console.WriteLine(addError);
+                            break;
                         case "2":
-                            Console.Write("ID adrese: "); int id = ReadId();
-                            if (_controller.GetById(id) == null) { Console.WriteLine("Adresa nije pronadjena."); break; }
-                            Console.WriteLine(_controller.Update(id, ReadAddress()) ? "Adresa izmenjena." : "Adresa nije pronadjena."); break;
+                            Adresa? existing = SelectAddress();
+                            if (existing == null) { Console.WriteLine("Izmena otkazana."); break; }
+                            Console.WriteLine($"Trenutna adresa: {existing}");
+                            Adresa? edited = ReadAddress();
+                            if (edited == null) { Console.WriteLine("Izmena otkazana."); break; }
+                            Console.WriteLine(_controller.TryUpdate(existing.Id, edited, out string updateError)
+                                ? "Adresa izmenjena." : updateError);
+                            break;
                         case "3":
-                            Console.Write("ID adrese: ");
-                            Console.WriteLine(_controller.Remove(ReadId()) ? "Adresa obrisana." : "Adresa nije pronadjena."); break;
+                            Adresa? selected = SelectAddress();
+                            if (selected == null) { Console.WriteLine("Brisanje otkazano."); break; }
+                            Console.WriteLine(_controller.TryRemove(selected.Id, out string removeError)
+                                ? "Adresa obrisana." : removeError);
+                            break;
                         case "4": ShowAll(); break;
                         default: Console.WriteLine("Nepoznata opcija."); break;
                     }
                 }
-                catch (ArgumentException ex) { Console.WriteLine(ex.Message); }
-                catch (InvalidOperationException ex) { Console.WriteLine(ex.Message); }
+                catch (IOException ex) { Console.WriteLine($"Greska pri cuvanju adrese: {ex.Message}"); }
+                catch (UnauthorizedAccessException ex) { Console.WriteLine($"Pristup datoteci nije dozvoljen: {ex.Message}"); }
+                catch (OverflowException) { Console.WriteLine("Nije moguce generisati novi ID adrese."); }
             }
         }
     }
