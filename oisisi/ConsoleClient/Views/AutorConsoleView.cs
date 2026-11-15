@@ -10,10 +10,12 @@ namespace ConsoleClient.Views
     public class AutorConsoleView
     {
         private readonly AutorController _controller;
+        private readonly AdresaConsoleView? _adrese;
 
-        public AutorConsoleView(AutorController controller)
+        public AutorConsoleView(AutorController controller, AdresaConsoleView? adrese = null)
         {
             _controller = controller;
+            _adrese = adrese;
         }
 
         public void AddAutor()
@@ -30,19 +32,7 @@ namespace ConsoleClient.Views
                 "dd.MM.yyyy",
                 CultureInfo.InvariantCulture);
 
-            Console.Write("Ulica: ");
-            string ulica = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Broj: ");
-            string broj = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Grad: ");
-            string grad = Console.ReadLine() ?? string.Empty;
-
-            Console.Write("Drzava: ");
-            string drzava = Console.ReadLine() ?? string.Empty;
-
-            Adresa adresa = new Adresa(ulica, broj, grad, drzava);
+            Adresa adresa = ReadAddress();
 
             Console.Write("Telefon: ");
             string telefon = Console.ReadLine() ?? string.Empty;
@@ -133,19 +123,7 @@ namespace ConsoleClient.Views
                     CultureInfo.InvariantCulture
                 );
 
-                Console.Write("Ulica: ");
-                string ulica = Console.ReadLine() ?? string.Empty;
-
-                Console.Write("Broj: ");
-                string broj = Console.ReadLine() ?? string.Empty;
-
-                Console.Write("Grad: ");
-                string grad = Console.ReadLine() ?? string.Empty;
-
-                Console.Write("Drzava: ");
-                string drzava = Console.ReadLine() ?? string.Empty;
-
-                autor.Adresa = new Adresa(ulica, broj, grad, drzava);
+                autor.Adresa = ReadAddress();
 
                 Console.Write("Telefon: ");
                 autor.Telefon = Console.ReadLine() ?? string.Empty;
@@ -175,5 +153,11 @@ namespace ConsoleClient.Views
             }
         }
 
+        private Adresa ReadAddress()
+        {
+            if (_adrese == null)
+                throw new InvalidOperationException("Prikaz adresa nije povezan sa ovim menijem.");
+            return _adrese.SelectAddress();
+        }
     }
 }

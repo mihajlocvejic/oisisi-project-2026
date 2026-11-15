@@ -11,15 +11,20 @@ namespace Core.DAO
 {
     public class AutorDAO
     {
+        private readonly AdresaDAO _adresaDAO;
         private readonly List<Autor> _autori;
         private readonly Serializer<Autor> _serializer;
         private readonly string _filePath;
 
-        public AutorDAO(string filePath)
+        public AutorDAO(string filePath, AdresaDAO? adresaDAO = null)
         {
             _filePath = filePath;
             _serializer = new Serializer<Autor>();
             _autori = _serializer.FromCSV(_filePath);
+            _adresaDAO = adresaDAO ?? new AdresaDAO(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(filePath))!, "adrese.csv"));
+            foreach (Autor item in _autori)
+                item.Adresa = _adresaDAO.GetById(item.Adresa.Id)
+                    ?? throw new FormatException("Povezana adresa ne postoji.");
         }
 
         public List<Autor> GetAll()
@@ -36,6 +41,8 @@ namespace Core.DAO
         public void Add(Autor autor)
         {
             AutorValidator.Validate(autor);
+            autor.Adresa = _adresaDAO.GetById(autor.Adresa.Id)
+                ?? throw new ArgumentException("Izaberite postojecu adresu.");
 
             if (GetById(autor.BrojLicneKarte) != null)
                 throw new InvalidOperationException(
@@ -48,6 +55,8 @@ namespace Core.DAO
         public void Update(Autor autor)
         {
             AutorValidator.Validate(autor);
+            autor.Adresa = _adresaDAO.GetById(autor.Adresa.Id)
+                ?? throw new ArgumentException("Izaberite postojecu adresu.");
 
             Autor? existing = GetById(autor.BrojLicneKarte);
 

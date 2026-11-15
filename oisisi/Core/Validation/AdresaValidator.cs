@@ -5,19 +5,25 @@ namespace Core.Validation
 {
     public static class AdresaValidator
     {
+        public static bool IsValidText(string value)
+        {
+            return !string.IsNullOrWhiteSpace(value)
+                && !value.Contains('|') && !value.Contains('\n') && !value.Contains('\r');
+        }
+
         public static bool IsValid(Adresa? adresa)
         {
             return adresa != null
-                && !string.IsNullOrWhiteSpace(adresa.Ulica)
-                && !string.IsNullOrWhiteSpace(adresa.Broj)
-                && !string.IsNullOrWhiteSpace(adresa.Grad)
-                && !string.IsNullOrWhiteSpace(adresa.Drzava);
+                && IsValidText(adresa.Ulica)
+                && IsValidText(adresa.Broj)
+                && IsValidText(adresa.Grad)
+                && IsValidText(adresa.Drzava);
         }
 
         public static void Validate(Adresa? adresa)
         {
             if (!IsValid(adresa))
-                throw new ArgumentException("Sva polja adrese su obavezna.");
+                throw new ArgumentException("Sva polja adrese su obavezna i ne smeju sadrzati | ili novi red.");
         }
     }
 }

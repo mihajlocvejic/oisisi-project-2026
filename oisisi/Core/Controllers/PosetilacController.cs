@@ -9,9 +9,9 @@ namespace Core.Controllers
     {
         private readonly PosetilacDAO _dao;
 
-        public PosetilacController(string fileName)
+        public PosetilacController(string fileName, AdresaDAO? adresaDAO = null)
         {
-            _dao = new PosetilacDAO(fileName);
+            _dao = new PosetilacDAO(fileName, adresaDAO);
         }
 
         public bool Add(Posetilac posetilac)
