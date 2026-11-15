@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Core.Controllers;
 using Core.Models;
+using Core.Validation;
 
 namespace ConsoleClient.Views
 {
@@ -134,19 +135,10 @@ namespace ConsoleClient.Views
                 Console.Write(message);
                 string value = Console.ReadLine()?.Trim() ?? string.Empty;
 
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Console.WriteLine("Polje ne sme biti prazno.");
-                    continue;
-                }
+                if (IzdavacValidator.IsValidText(value))
+                    return value;
 
-                if (value.Contains('|'))
-                {
-                    Console.WriteLine("Znak | nije dozvoljen.");
-                    continue;
-                }
-
-                return value;
+                Console.WriteLine("Polje ne sme biti prazno niti sadrzati znak |.");
             }
         }
     }
