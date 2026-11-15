@@ -29,7 +29,13 @@ namespace Core.DAO
 
         public Knjiga? GetByISBN(string isbn)
         {
-            return _knjige.FirstOrDefault(k => k.ISBN == isbn);
+            if (string.IsNullOrWhiteSpace(isbn))
+                return null;
+
+            string isbnBezCrtica = isbn.Replace("-", "");
+
+            return _knjige.FirstOrDefault(k =>
+                k.ISBN.Replace("-", "") == isbnBezCrtica);
         }
 
         public void Add(Knjiga knjiga)

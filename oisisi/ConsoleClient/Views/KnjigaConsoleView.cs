@@ -51,7 +51,7 @@ namespace ConsoleClient.Views
 
             Console.WriteLine(knjiga);
 
-            PrikaziAutore(isbn);
+            PrikaziAutore(knjiga.ISBN);
         }
 
 
@@ -157,7 +157,7 @@ namespace ConsoleClient.Views
                 return;
             }
 
-            PrikaziAutore(isbn);
+            PrikaziAutore(knjiga.ISBN);
 
             Console.Write("Unesite broj licne karte autora za uklanjanje: ");
             string brojLicneKarte = Console.ReadLine() ?? "";
@@ -187,7 +187,7 @@ namespace ConsoleClient.Views
                 return;
             }
 
-            PrikaziAutore(isbn);
+            PrikaziAutore(knjiga.ISBN);
 
             Console.Write("Unesite broj licne karte autora za dodavanje: ");
             string brojLicneKarte = Console.ReadLine() ?? "";
