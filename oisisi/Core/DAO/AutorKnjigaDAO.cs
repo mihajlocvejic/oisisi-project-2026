@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Core.Models;
 using Core.Serialization;
+using Core.Validation;
 
 namespace Core.DAO
 {
@@ -51,16 +52,14 @@ namespace Core.DAO
 
         public void Add(string brojLicneKarte, string isbn)
         {
-            if (string.IsNullOrWhiteSpace(brojLicneKarte) ||
-                string.IsNullOrWhiteSpace(isbn))
-                throw new ArgumentException(
-                    "Autor i ISBN su obavezni.");
+            AutorKnjiga veza = new AutorKnjiga(brojLicneKarte, isbn);
+            AutorKnjigaValidator.Validate(veza);
 
             if (Exists(brojLicneKarte, isbn))
                 throw new InvalidOperationException(
                     "Veza vec postoji.");
 
-            _veze.Add(new AutorKnjiga(brojLicneKarte, isbn));
+            _veze.Add(veza);
             Save();
         }
 
