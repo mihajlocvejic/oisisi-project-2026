@@ -1,19 +1,10 @@
 ﻿using Core.Controllers;
+using Core.Storage;
 using ConsoleClient.Views;
 
-char separator = Path.DirectorySeparatorChar;
-
-string fileName = Path.GetFullPath(
-    $"..{separator}..{separator}..{separator}Data{separator}posetioci.csv",
-    AppContext.BaseDirectory);
-
-string kupovinaFileName = Path.GetFullPath(
-    $"..{separator}..{separator}..{separator}Data{separator}kupovine.csv",
-    AppContext.BaseDirectory);
-
-string izdavacFileName = Path.GetFullPath(
-    $"..{separator}..{separator}..{separator}Data{separator}izdavaci.csv",
-    AppContext.BaseDirectory);
+string fileName = DataPaths.GetPath("posetioci.csv");
+string kupovinaFileName = DataPaths.GetPath("kupovine.csv");
+string izdavacFileName = DataPaths.GetPath("izdavaci.csv");
 
 PosetilacController controller = new PosetilacController(fileName);
 PosetilacConsoleView view = new PosetilacConsoleView(controller);
