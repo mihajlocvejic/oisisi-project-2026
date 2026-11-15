@@ -1,6 +1,7 @@
-﻿using Core.DAO;
+﻿using System.Collections.Generic;
+using Core.DAO;
 using Core.Models;
-using System.Collections.Generic;
+using Core.Validation;
 
 namespace Core.Controllers
 {
@@ -15,11 +16,17 @@ namespace Core.Controllers
 
         public bool Add(Posetilac posetilac)
         {
+            if (!PosetilacValidator.IsValid(posetilac))
+                return false;
+
             return _dao.Add(posetilac);
         }
 
         public bool Update(string brojClanskeKarte, Posetilac posetilac)
         {
+            if (!PosetilacValidator.IsValid(posetilac))
+                return false;
+
             return _dao.Update(brojClanskeKarte, posetilac);
         }
 
