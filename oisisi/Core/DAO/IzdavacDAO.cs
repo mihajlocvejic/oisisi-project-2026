@@ -91,7 +91,7 @@ namespace Core.DAO
                 EntityComparison.SameIdentifier(i.Sifra, sifra));
         }
 
-        private void Save()
+        public void Save()
         {
             _serializer.ToCSV(_fileName, _izdavaci);
         }

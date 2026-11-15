@@ -28,10 +28,17 @@ namespace ConsoleClient.Views
             string brojClanskeKarte = ReadMembershipCard("Broj clanske karte: ");
             int godinaClanstva = ReadMembershipYear("Godina clanstva: ");
             StatusPosetioca status = ReadStatus("Status (R/V): ");
+            Adresa? adresa = ReadAddress();
+
+            if (adresa == null)
+            {
+                Console.WriteLine("Operacija je otkazana.");
+                return;
+            }
 
             Posetilac posetilac = new Posetilac(
                 ime, prezime, datumRodjenja,
-                ReadAddress(), kontaktTelefon, email,
+                adresa, kontaktTelefon, email,
                 brojClanskeKarte, godinaClanstva, status
             );
 
@@ -68,10 +75,17 @@ namespace ConsoleClient.Views
             string noviBrojClanskeKarte = postojeci.BrojClanskeKarte;
             int godinaClanstva = ReadMembershipYear("Nova godina clanstva: ");
             StatusPosetioca status = ReadStatus("Novi status (R/V): ");
+            Adresa? adresa = ReadAddress();
+
+            if (adresa == null)
+            {
+                Console.WriteLine("Operacija je otkazana.");
+                return;
+            }
 
             Posetilac izmenjeni = new Posetilac(
                 ime, prezime, datumRodjenja,
-                ReadAddress(), kontaktTelefon, email,
+                adresa, kontaktTelefon, email,
                 noviBrojClanskeKarte, godinaClanstva, status
             );
 
@@ -102,7 +116,7 @@ namespace ConsoleClient.Views
             }
             else
             {
-                Console.WriteLine("Posetilac ima evidentirane kupovine i ne moze biti obrisan.");
+                Console.WriteLine("Brisanje posetioca nije uspelo.");
             }
         }
 
@@ -282,7 +296,7 @@ namespace ConsoleClient.Views
                 Console.WriteLine("Neispravna email adresa.");
             }
         }
-        private Adresa ReadAddress()
+        private Adresa? ReadAddress()
         {
             return _adrese.SelectAddress();
         }

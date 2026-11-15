@@ -54,11 +54,6 @@ namespace Core.Controllers
             return _dao.Remove(sifra);
         }
 
-        public List<Izdavac> GetAll()
-        {
-            return _dao.GetAll();
-        }
-
         private bool ValidateRelations(Izdavac izdavac)
         {
             List<Autor> autori = new List<Autor>();
@@ -97,9 +92,28 @@ namespace Core.Controllers
             return true;
         }
 
+        public List<Izdavac> GetAll()
+        {
+            List<Izdavac> izdavaci = _dao.GetAll();
+
+            foreach (Izdavac izdavac in izdavaci)
+            {
+                izdavac.Knjige = GetKnjigeIzdavaca(izdavac.Sifra);
+            }
+
+            return izdavaci;
+        }
+
         public Izdavac? GetById(string sifra)
         {
-            return _dao.GetById(sifra);
+            Izdavac? izdavac = _dao.GetById(sifra);
+
+            if (izdavac != null)
+            {
+                izdavac.Knjige = GetKnjigeIzdavaca(izdavac.Sifra);
+            }
+
+            return izdavac;
         }
 
         public Autor? GetAutorById(string brojLicneKarte)

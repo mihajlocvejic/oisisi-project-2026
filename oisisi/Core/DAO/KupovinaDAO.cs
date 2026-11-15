@@ -108,5 +108,24 @@ namespace Core.DAO
         {
             _serializer.ToCSV(_fileName, _kupovine);
         }
+
+        public void RemoveByPosetilac(string brojClanskeKarte)
+        {
+            int removed = _kupovine.RemoveAll(k =>
+                EntityComparison.SameIdentifier(
+                    k.BrojClanskeKarte, brojClanskeKarte));
+
+            if (removed > 0)
+                Save();
+        }
+
+        public void RemoveByISBN(string isbn)
+        {
+            int removed = _kupovine.RemoveAll(k =>
+                EntityComparison.SameISBN(k.ISBN, isbn));
+
+            if (removed > 0)
+                Save();
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Core.DAO;
 using Core.Models;
 using Core.Validation;
+using System.Linq;
 
 namespace Core.Controllers
 {
@@ -45,6 +46,8 @@ namespace Core.Controllers
             posetilac.IzracunajProsecnuOcenu();
             _posetilacDAO.Save();
 
+            RefreshBookBuyers(knjiga);
+
             return true;
         }
 
@@ -64,13 +67,15 @@ namespace Core.Controllers
             Posetilac? noviPosetilac = _posetilacDAO.GetById(
                 kupovina.BrojClanskeKarte);
 
-            Knjiga? knjiga = _knjigaDAO.GetByISBN(kupovina.ISBN);
+            Knjiga? staraKnjiga = _knjigaDAO.GetByISBN(postojeca.ISBN);
+            Knjiga? novaKnjiga = _knjigaDAO.GetByISBN(kupovina.ISBN);
 
-            if (stariPosetilac == null || noviPosetilac == null || knjiga == null)
+            if (stariPosetilac == null || noviPosetilac == null
+                || staraKnjiga == null || novaKnjiga == null)
                 return false;
 
             kupovina.BrojClanskeKarte = noviPosetilac.BrojClanskeKarte;
-            kupovina.ISBN = knjiga.ISBN;
+            kupovina.ISBN = novaKnjiga.ISBN;
 
             if (!_dao.Update(id, kupovina))
                 return false;
@@ -90,6 +95,11 @@ namespace Core.Controllers
 
             _posetilacDAO.Save();
 
+            RefreshBookBuyers(staraKnjiga);
+
+            if (staraKnjiga != novaKnjiga)
+                RefreshBookBuyers(novaKnjiga);
+
             return true;
         }
 
@@ -103,7 +113,9 @@ namespace Core.Controllers
             Posetilac? posetilac = _posetilacDAO.GetById(
                 kupovina.BrojClanskeKarte);
 
-            if (posetilac == null)
+            Knjiga? knjiga = _knjigaDAO.GetByISBN(kupovina.ISBN);
+
+            if (posetilac == null || knjiga == null)
                 return false;
 
             if (!_dao.Remove(id))
@@ -116,7 +128,17 @@ namespace Core.Controllers
 
             _posetilacDAO.Save();
 
+            RefreshBookBuyers(knjiga);
+
             return true;
+        }
+
+        private void RefreshBookBuyers(Knjiga knjiga)
+        {
+            knjiga.KupciClanskeKarte = _dao.GetByISBN(knjiga.ISBN)
+                .Select(k => k.BrojClanskeKarte)
+                .Distinct()
+                .ToList();
         }
 
         public List<Kupovina> GetAll()
@@ -144,5 +166,6 @@ namespace Core.Controllers
             return _posetilacDAO.GetAll().Count > 0
                 && _knjigaDAO.GetAll().Count > 0;
         }
+
     }
 }

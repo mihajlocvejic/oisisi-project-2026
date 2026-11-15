@@ -108,7 +108,6 @@ namespace ConsoleClient.Views
 
             foreach (Izdavac izdavac in izdavaci)
             {
-                izdavac.Knjige = _controller.GetKnjigeIzdavaca(izdavac.Sifra);
 
                 Console.WriteLine(izdavac);
 
