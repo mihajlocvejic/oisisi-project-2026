@@ -7,8 +7,7 @@ namespace Core.Validation
     {
         public static bool IsValidText(string value)
         {
-            return !string.IsNullOrWhiteSpace(value)
-                && !value.Contains('|') && !value.Contains('\n') && !value.Contains('\r');
+            return CsvFieldValidator.IsValidRequired(value);
         }
 
         public static bool IsValid(Adresa? adresa)

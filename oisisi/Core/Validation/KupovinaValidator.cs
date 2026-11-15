@@ -13,7 +13,7 @@ namespace Core.Validation
         public static bool IsValidPurchaseDate(DateTime date)
         {
             return date != DateTime.MinValue
-                && date <= DateTime.Today;
+                && date.Date <= DateTime.Today;
         }
 
         public static bool IsValidRating(int rating)
@@ -29,10 +29,10 @@ namespace Core.Validation
                 && !comment.Contains('\r');
         }
 
-        public static bool IsValid(Kupovina kupovina)
+        public static bool IsValid(Kupovina? kupovina)
         {
-            return PosetilacValidator.IsValidMembershipCard(
-                    kupovina.BrojClanskeKarte)
+            return kupovina != null
+                && PosetilacValidator.IsValidMembershipCard(kupovina.BrojClanskeKarte)
                 && IsValidISBN(kupovina.ISBN)
                 && IsValidPurchaseDate(kupovina.DatumKupovine)
                 && IsValidRating(kupovina.Ocena)

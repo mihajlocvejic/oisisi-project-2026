@@ -9,7 +9,7 @@ namespace Core.Validation
             if (string.IsNullOrWhiteSpace(isbn))
                 return false;
 
-            isbn = isbn.Replace("-", "");
+            isbn = isbn.Trim().Replace("-", "");
 
             return IsValidISBN10(isbn) || IsValidISBN13(isbn);
         }
