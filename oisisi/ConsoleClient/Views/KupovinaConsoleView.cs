@@ -18,6 +18,12 @@ namespace ConsoleClient.Views
 
         public void AddKupovina()
         {
+            if (!_controller.CanAddPurchase())
+            {
+                Console.WriteLine("Prvo morate dodati posetioca i knjigu.");
+                return;
+            }
+
             string brojClanskeKarte = ReadMembershipCard("Broj clanske karte: ");
             string isbn = ReadISBN("ISBN knjige: ");
             DateTime datumKupovine = ReadDate("Datum kupovine (dd.MM.yyyy): ");
@@ -49,8 +55,7 @@ namespace ConsoleClient.Views
                 return;
             }
 
-            Kupovina? postojeca = _controller.GetAll()
-                .Find(k => k.Id == id);
+            Kupovina? postojeca = _controller.GetById(id);
 
             if (postojeca == null)
             {
@@ -161,10 +166,19 @@ namespace ConsoleClient.Views
                 Console.Write(message);
                 string card = Console.ReadLine()?.Trim() ?? string.Empty;
 
-                if (PosetilacValidator.IsValidMembershipCard(card))
-                    return card;
+                if (!PosetilacValidator.IsValidMembershipCard(card))
+                {
+                    Console.WriteLine("Neispravan format. Primer: SK-1-2023.");
+                    continue;
+                }
 
-                Console.WriteLine("Neispravan format. Primer: SK-1-2023.");
+                if (!_controller.PosetilacExists(card))
+                {
+                    Console.WriteLine("Posetilac ne postoji.");
+                    continue;
+                }
+
+                return card;
             }
         }
 
@@ -175,10 +189,19 @@ namespace ConsoleClient.Views
                 Console.Write(message);
                 string isbn = Console.ReadLine()?.Trim() ?? string.Empty;
 
-                if (KupovinaValidator.IsValidISBN(isbn))
-                    return isbn;
+                if (!KupovinaValidator.IsValidISBN(isbn))
+                {
+                    Console.WriteLine("Neispravan ISBN.");
+                    continue;
+                }
 
-                Console.WriteLine("Neispravan ISBN.");
+                if (!_controller.KnjigaExists(isbn))
+                {
+                    Console.WriteLine("Knjiga ne postoji.");
+                    continue;
+                }
+
+                return isbn;
             }
         }
 
