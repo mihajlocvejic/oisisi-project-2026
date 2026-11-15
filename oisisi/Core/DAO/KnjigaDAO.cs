@@ -44,7 +44,12 @@ namespace Core.DAO
             List<Knjiga> updated = new(_knjige);
             updated[index] = stored;
             Save(updated);
-            _knjige[index] = stored;
+            existing.Naziv = stored.Naziv;
+            existing.Zanr = stored.Zanr;
+            existing.GodinaIzdanja = stored.GodinaIzdanja;
+            existing.Cena = stored.Cena;
+            existing.BrojStrana = stored.BrojStrana;
+            existing.SifraIzdavaca = stored.SifraIzdavaca;
         }
 
         private static Knjiga Copy(Knjiga data, Knjiga relatedData) => new(
