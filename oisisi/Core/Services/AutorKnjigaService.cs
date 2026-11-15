@@ -1,10 +1,7 @@
-﻿
-using System;
-using System.Collections.Generic;
-using Core.DAO;
+﻿using Core.DAO;
 using Core.Models;
 using Core.Utils;
-using System.Linq;
+using Core.Validation;
 
 namespace Core.Services
 {
@@ -14,215 +11,145 @@ namespace Core.Services
         private readonly KnjigaDAO _knjigaDAO;
         private readonly AutorKnjigaDAO _autorKnjigaDAO;
 
-        public AutorKnjigaService(
-            AutorDAO autorDAO,
-            KnjigaDAO knjigaDAO,
-            AutorKnjigaDAO autorKnjigaDAO)
+        public AutorKnjigaService(AutorDAO autorDAO, KnjigaDAO knjigaDAO, AutorKnjigaDAO autorKnjigaDAO)
         {
+            ArgumentNullException.ThrowIfNull(autorDAO);
+            ArgumentNullException.ThrowIfNull(knjigaDAO);
+            ArgumentNullException.ThrowIfNull(autorKnjigaDAO);
             _autorDAO = autorDAO;
             _knjigaDAO = knjigaDAO;
             _autorKnjigaDAO = autorKnjigaDAO;
         }
 
-        public bool AutorPostoji(string brojLicneKarte) => _autorDAO.GetById(brojLicneKarte) != null;
+        public bool AutorPostoji(string brojLicneKarte) =>
+            AutorValidator.IsValidIdentityCard(brojLicneKarte) && _autorDAO.GetById(brojLicneKarte) != null;
 
-        public void DodajAutoraNaKnjigu(
-            string brojLicneKarte,
-            string isbn)
+        public void DodajAutoraNaKnjigu(string brojLicneKarte, string isbn)
         {
-            Autor? autor = _autorDAO.GetById(brojLicneKarte);
-
-            if (autor == null)
-                throw new InvalidOperationException(
-                    "Autor ne postoji.");
-
-            Knjiga? knjiga = _knjigaDAO.GetByISBN(isbn);
-
-            if (knjiga == null)
-                throw new InvalidOperationException(
-                    "Knjiga ne postoji.");
-
-            if (_autorKnjigaDAO.Exists(brojLicneKarte, isbn))
-                throw new InvalidOperationException(
-                    "Autor je vec povezan sa ovom knjigom.");
-
+            AutorKnjigaValidator.Validate(new AutorKnjiga(brojLicneKarte, isbn));
+            Autor autor = _autorDAO.GetById(brojLicneKarte)
+                ?? throw new InvalidOperationException("Autor ne postoji.");
+            Knjiga knjiga = _knjigaDAO.GetByISBN(isbn)
+                ?? throw new InvalidOperationException("Knjiga ne postoji.");
+            if (_autorKnjigaDAO.Exists(autor.BrojLicneKarte, knjiga.ISBN))
+                throw new InvalidOperationException("Autor je vec povezan sa ovom knjigom.");
             _autorKnjigaDAO.Add(autor.BrojLicneKarte, knjiga.ISBN);
         }
 
-        public void UkloniAutoraSaKnjige(
-            string brojLicneKarte,
-            string isbn)
+        public void UkloniAutoraSaKnjige(string brojLicneKarte, string isbn)
         {
-            if (_knjigaDAO.GetByISBN(isbn) == null)
-                throw new InvalidOperationException(
-                    "Knjiga ne postoji.");
-
-            if (!_autorKnjigaDAO.Exists(brojLicneKarte, isbn))
-                throw new InvalidOperationException(
-                    "Veza autora i knjige ne postoji.");
-
-            _autorKnjigaDAO.Delete(brojLicneKarte, isbn);
+            AutorKnjigaValidator.Validate(new AutorKnjiga(brojLicneKarte, isbn));
+            Knjiga knjiga = _knjigaDAO.GetByISBN(isbn)
+                ?? throw new InvalidOperationException("Knjiga ne postoji.");
+            if (!_autorKnjigaDAO.Exists(brojLicneKarte, knjiga.ISBN))
+                throw new InvalidOperationException("Veza autora i knjige ne postoji.");
+            // Knjiga moze ostati bez autora.
+            _autorKnjigaDAO.Remove(brojLicneKarte, knjiga.ISBN);
         }
 
-        public List<string> GetAutoriZaKnjigu(string isbn)
+        public List<string> GetAutoriZaKnjigu(string isbn) => _autorKnjigaDAO.GetAutoriZaKnjigu(isbn);
+        public List<string> GetKnjigeZaAutora(string brojLicneKarte) => _autorKnjigaDAO.GetKnjigeZaAutora(brojLicneKarte);
+
+        public void DodajKnjigu(Knjiga knjiga, List<string> brojeviLicnihKarata)
         {
-            return _autorKnjigaDAO.GetAutoriZaKnjigu(isbn);
-        }
+            ArgumentNullException.ThrowIfNull(knjiga);
+            ArgumentNullException.ThrowIfNull(brojeviLicnihKarata);
+            KnjigaValidator.Validate(knjiga);
+            if (brojeviLicnihKarata.Any(id => !AutorValidator.IsValidIdentityCard(id)))
+                throw new ArgumentException("Broj licne karte autora nije ispravan.");
 
-        public List<string> GetKnjigeZaAutora(
-            string brojLicneKarte)
-        {
-            return _autorKnjigaDAO.GetKnjigeZaAutora(
-                brojLicneKarte);
-        }
+            // Svi autori se pronalaze pre upisa; u veze ulaze njihovi sacuvani identifikatori.
+            List<Autor> autori = brojeviLicnihKarata.DistinctBy(EntityComparison.IdentifierKey)
+                .Select(id => _autorDAO.GetById(id)
+                    ?? throw new InvalidOperationException($"Autor sa licnom kartom {id} ne postoji."))
+                .ToList();
 
-
-        public void DodajKnjigu(
-            Knjiga knjiga,
-            List<string> brojeviLicnihKarata)
-        {
-            if (knjiga == null)
-                throw new ArgumentNullException(nameof(knjiga));
-
-            if (brojeviLicnihKarata == null)
-                throw new ArgumentNullException(nameof(brojeviLicnihKarata));
-
-            if (brojeviLicnihKarata.Any(string.IsNullOrWhiteSpace))
-                throw new ArgumentException(
-                    "Broj licne karte autora ne moze biti prazan.");
-
-            List<string> autori = brojeviLicnihKarata.DistinctBy(EntityComparison.IdentifierKey).ToList();
-
-            foreach (string brojLicneKarte in autori)
-            {
-                if (_autorDAO.GetById(brojLicneKarte) == null)
-                    throw new InvalidOperationException(
-                        $"Autor sa licnom kartom {brojLicneKarte} ne postoji.");
-            }
-
-            // Knjiga se prvo cuva u knjige.csv.
+            // Prazna lista autora je dozvoljena.
             _knjigaDAO.Add(knjiga);
-
+            List<Action> undo = new() { () => _knjigaDAO.Remove(knjiga.ISBN) };
             try
             {
-                // Zatim se veze cuvaju u autor_knjiga.csv.
-                foreach (string brojLicneKarte in autori)
+                foreach (Autor autor in autori)
                 {
-                    _autorKnjigaDAO.Add(brojLicneKarte, knjiga.ISBN);
+                    _autorKnjigaDAO.Add(autor.BrojLicneKarte, knjiga.ISBN);
+                    undo.Add(() => _autorKnjigaDAO.Remove(autor.BrojLicneKarte, knjiga.ISBN));
                 }
             }
-            catch
+            catch (Exception original)
             {
-                // Ako cuvanje veze ne uspije, pokusavamo
-                // ukloniti prethodno dodate veze i knjigu.
-                foreach (string brojLicneKarte in autori)
-                {
-                    if (_autorKnjigaDAO.Exists(brojLicneKarte, knjiga.ISBN))
-                        _autorKnjigaDAO.Delete(brojLicneKarte, knjiga.ISBN);
-                }
-
-                _knjigaDAO.Remove(knjiga.ISBN);
+                Rollback(original, undo);
                 throw;
             }
         }
 
-
         public void ObrisiKnjigu(string isbn)
         {
-            Knjiga? knjiga = _knjigaDAO.GetByISBN(isbn);
-
-            if (knjiga == null)
-                throw new InvalidOperationException(
-                    "Knjiga ne postoji.");
-
-            // Pronalazimo sve autore povezane sa knjigom.
-            List<string> autori =
-                _autorKnjigaDAO.GetAutoriZaKnjigu(isbn);
-
-            // Prvo uklanjamo veze.
-            List<string> uklonjeniAutori = new List<string>();
-
+            Knjiga knjiga = _knjigaDAO.GetByISBN(isbn)
+                ?? throw new InvalidOperationException("Knjiga ne postoji.");
+            List<AutorKnjiga> veze = _autorKnjigaDAO.GetAll()
+                .Where(v => EntityComparison.SameISBN(v.ISBN, knjiga.ISBN)).ToList();
+            List<Action> undo = new();
             try
             {
-                foreach (string brojLicneKarte in autori)
+                foreach (AutorKnjiga veza in veze)
                 {
-                    _autorKnjigaDAO.Delete(brojLicneKarte, isbn);
-                    uklonjeniAutori.Add(brojLicneKarte);
+                    _autorKnjigaDAO.Remove(veza.BrojLicneKarte, veza.ISBN);
+                    undo.Add(() => _autorKnjigaDAO.Add(veza.BrojLicneKarte, veza.ISBN));
                 }
-
-                // Kada su veze uklonjene, brisemo knjigu.
-                _knjigaDAO.Remove(isbn);
+                _knjigaDAO.Remove(knjiga.ISBN);
             }
-            catch
+            catch (Exception original)
             {
-                // Pokusavamo vratiti prethodno uklonjene veze.
-                foreach (string brojLicneKarte in uklonjeniAutori)
-                {
-                    if (!_autorKnjigaDAO.Exists(brojLicneKarte, isbn))
-                    {
-                        _autorKnjigaDAO.Add(brojLicneKarte, isbn);
-                    }
-                }
-
+                Rollback(original, undo);
                 throw;
             }
         }
 
         public List<Autor> GetAutoriKnjige(string isbn)
         {
-            List<string> brojeviLicnihKarata =
-                _autorKnjigaDAO.GetAutoriZaKnjigu(isbn);
-
-            List<Autor> autori = new List<Autor>();
-
-            foreach (string brojLicneKarte in brojeviLicnihKarata)
+            List<Autor> autori = new();
+            foreach (string id in _autorKnjigaDAO.GetAutoriZaKnjigu(isbn))
             {
-                Autor? autor = _autorDAO.GetById(brojLicneKarte);
-
-                if (autor != null)
-                    autori.Add(autor);
+                Autor? autor = _autorDAO.GetById(id);
+                if (autor != null) autori.Add(autor);
             }
-
             return autori;
         }
 
-
         public void ObrisiAutora(string brojLicneKarte)
         {
-            Autor? autor = _autorDAO.GetById(brojLicneKarte);
-
-            if (autor == null)
-                throw new InvalidOperationException("Autor ne postoji.");
-
-            List<string> knjige =
-                _autorKnjigaDAO.GetKnjigeZaAutora(brojLicneKarte);
-
-            // Uklanjamo sve veze autora sa knjigama.
-            List<string> uklonjeneVeze = new List<string>();
-
+            Autor autor = _autorDAO.GetById(brojLicneKarte)
+                ?? throw new InvalidOperationException("Autor ne postoji.");
+            List<AutorKnjiga> veze = _autorKnjigaDAO.GetAll()
+                .Where(v => EntityComparison.SameIdentifier(v.BrojLicneKarte, autor.BrojLicneKarte)).ToList();
+            List<Action> undo = new();
             try
             {
-                foreach (string isbn in knjige)
+                foreach (AutorKnjiga veza in veze)
                 {
-                    _autorKnjigaDAO.Delete(brojLicneKarte, isbn);
-                    uklonjeneVeze.Add(isbn);
+                    _autorKnjigaDAO.Remove(veza.BrojLicneKarte, veza.ISBN);
+                    undo.Add(() => _autorKnjigaDAO.Add(veza.BrojLicneKarte, veza.ISBN));
                 }
-
-                _autorDAO.Remove(brojLicneKarte);
+                _autorDAO.Remove(autor.BrojLicneKarte);
             }
-            catch
+            catch (Exception original)
             {
-                // Pokusavamo vratiti veze ako brisanje ne uspije.
-                foreach (string isbn in uklonjeneVeze)
-                {
-                    if (!_autorKnjigaDAO.Exists(brojLicneKarte, isbn))
-                        _autorKnjigaDAO.Add(brojLicneKarte, isbn);
-                }
-
+                Rollback(original, undo);
                 throw;
             }
         }
 
-
+        private static void Rollback(Exception original, List<Action> undo)
+        {
+            List<Exception> errors = new();
+            // Svaki uspesan korak ima svoju suprotnu operaciju; pokusavamo sve obrnutim redom.
+            for (int i = undo.Count - 1; i >= 0; i--)
+            {
+                try { undo[i](); }
+                catch (Exception rollbackError) { errors.Add(rollbackError); }
+            }
+            // Zadrzavamo originalni izuzetak i njegov stack trace; oporavak nije transakcija.
+            if (errors.Count > 0) original.Data["AutorKnjigaRollbackErrors"] = errors.ToArray();
+        }
     }
 }
