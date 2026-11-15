@@ -1,100 +1,25 @@
 ﻿using ConsoleClient.Views;
-using Core.Controllers;
-using Core.DAO;
-using Core.Services;
-using Core.Storage;
-using Core.Utils;
-using System.Linq;
+using Core;
 
-AdresaDAO adresaDAO = new AdresaDAO(
-    DataPaths.GetPath("adrese.csv"));
+ApplicationContext context = new ApplicationContext();
 
-AutorDAO autorDAO = new AutorDAO(
-    DataPaths.GetPath("autori.csv"), adresaDAO);
+AdresaConsoleView adresaView = new(
+    context.AdresaController);
 
-PosetilacDAO posetilacDAO = new PosetilacDAO(
-    DataPaths.GetPath("posetioci.csv"), adresaDAO);
+PosetilacConsoleView posetilacView = new(
+    context.PosetilacController, adresaView);
 
-IzdavacDAO izdavacDAO = new IzdavacDAO(
-    DataPaths.GetPath("izdavaci.csv"), autorDAO);
+AutorConsoleView autorView = new(
+    context.AutorController, adresaView);
 
-KnjigaDAO knjigaDAO = new KnjigaDAO(
-    DataPaths.GetPath("knjige.csv"));
+KnjigaConsoleView knjigaView = new(
+    context.KnjigaController);
 
-KupovinaDAO kupovinaDAO = new KupovinaDAO(
-    DataPaths.GetPath("kupovine.csv"));
+KupovinaConsoleView kupovinaView = new(
+    context.KupovinaController);
 
-AutorKnjigaDAO autorKnjigaDAO = new AutorKnjigaDAO(
-    DataPaths.GetPath("autor_knjiga.csv"));
-
-foreach (var posetilac in posetilacDAO.GetAll())
-{
-    posetilac.Kupovine = kupovinaDAO.GetByPosetilac(
-        posetilac.BrojClanskeKarte);
-
-    posetilac.IzracunajProsecnuOcenu();
-}
-
-foreach (var izdavac in izdavacDAO.GetAll())
-{
-    izdavac.Knjige = knjigaDAO.GetAll()
-        .Where(k => EntityComparison.SameIdentifier(
-            k.SifraIzdavaca, izdavac.Sifra))
-        .ToList();
-}
-
-foreach (var knjiga in knjigaDAO.GetAll())
-{
-    knjiga.KupciClanskeKarte = kupovinaDAO.GetByISBN(knjiga.ISBN)
-        .Select(k => k.BrojClanskeKarte)
-        .Distinct()
-        .ToList();
-
-    knjiga.ListaZeljaClanskeKarte = posetilacDAO.GetAll()
-        .Where(p => p.ListaZeljaISBN.Any(isbn =>
-            EntityComparison.SameISBN(isbn, knjiga.ISBN)))
-        .Select(p => p.BrojClanskeKarte)
-        .ToList();
-}
-
-AutorKnjigaService autorKnjigaService = new AutorKnjigaService(
-    autorDAO, knjigaDAO, autorKnjigaDAO);
-
-PosetilacController posetilacController = new PosetilacController(
-    posetilacDAO, kupovinaDAO);
-
-KupovinaController kupovinaController = new KupovinaController(
-    kupovinaDAO, posetilacDAO, knjigaDAO);
-
-IzdavacController izdavacController = new IzdavacController(
-    izdavacDAO, autorDAO, knjigaDAO);
-
-AutorController autorController = new AutorController(
-    autorDAO, autorKnjigaService);
-
-KnjigaController knjigaController = new KnjigaController(
-    knjigaDAO, autorKnjigaService);
-
-AdresaController adresaController = new AdresaController(
-    adresaDAO, autorDAO, posetilacController);
-
-AdresaConsoleView adresaView = new AdresaConsoleView(
-    adresaController);
-
-PosetilacConsoleView posetilacView = new PosetilacConsoleView(
-    posetilacController, adresaView);
-
-AutorConsoleView autorView = new AutorConsoleView(
-    autorController, adresaView);
-
-KnjigaConsoleView knjigaView = new KnjigaConsoleView(
-    knjigaController);
-
-KupovinaConsoleView kupovinaView = new KupovinaConsoleView(
-    kupovinaController);
-
-IzdavacConsoleView izdavacView = new IzdavacConsoleView(
-    izdavacController);
+IzdavacConsoleView izdavacView = new(
+    context.IzdavacController);
 
 while (true)
 {
