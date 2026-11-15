@@ -10,7 +10,7 @@ namespace Core.Storage
             char separator = Path.DirectorySeparatorChar;
 
             return Path.GetFullPath(
-                $"..{separator}..{separator}..{separator}..{separator}Data{separator}{fileName}",
+                $"..{separator}..{separator}..{separator}..{separator}Core{separator}Data{separator}{fileName}",
                 AppContext.BaseDirectory);
         }
     }

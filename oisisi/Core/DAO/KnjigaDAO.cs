@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using Core.Models;
 using Core.Serialization;
-using System.Text.RegularExpressions;
+using Core.Validation;
 
 namespace Core.DAO
 {
@@ -87,7 +87,7 @@ namespace Core.DAO
             if (knjiga == null)
                 throw new ArgumentNullException(nameof(knjiga));
 
-            if (!IsValidISBN(knjiga.ISBN))
+            if (!ISBNValidator.IsValid(knjiga.ISBN))
                 throw new ArgumentException(
                     "ISBN mora biti ispravan ISBN-10 ili ISBN-13.");
 
@@ -115,46 +115,6 @@ namespace Core.DAO
             if (string.IsNullOrWhiteSpace(knjiga.SifraIzdavaca))
                 throw new ArgumentException(
                     "Sifra izdavaca je obavezna.");
-        }
-
-        private bool IsValidISBN(string isbn)
-        {
-            if (string.IsNullOrWhiteSpace(isbn))
-                return false;
-
-            string value = isbn.Replace("-", "").Replace(" ", "");
-
-            if (Regex.IsMatch(value, @"^\d{13}$"))
-            {
-                int sum = 0;
-
-                for (int i = 0; i < 13; i++)
-                {
-                    int digit = value[i] - '0';
-                    sum += digit * (i % 2 == 0 ? 1 : 3);
-                }
-
-                return sum % 10 == 0;
-            }
-
-            if (Regex.IsMatch(value, @"^\d{9}[\dXx]$"))
-            {
-                int sum = 0;
-
-                for (int i = 0; i < 10; i++)
-                {
-                    int digit = i == 9 &&
-                                (value[i] == 'X' || value[i] == 'x')
-                        ? 10
-                        : value[i] - '0';
-
-                    sum += digit * (10 - i);
-                }
-
-                return sum % 11 == 0;
-            }
-
-            return false;
         }
 
     }
