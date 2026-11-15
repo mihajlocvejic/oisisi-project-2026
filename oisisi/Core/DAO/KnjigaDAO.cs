@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Core.Models;
+using Core.Utils;
 using Core.Serialization;
 using Core.Validation;
 
@@ -32,10 +33,7 @@ namespace Core.DAO
             if (string.IsNullOrWhiteSpace(isbn))
                 return null;
 
-            string isbnBezCrtica = isbn.Replace("-", "");
-
-            return _knjige.FirstOrDefault(k =>
-                k.ISBN.Replace("-", "") == isbnBezCrtica);
+            return _knjige.FirstOrDefault(k => EntityComparison.SameISBN(k.ISBN, isbn));
         }
 
         public void Add(Knjiga knjiga)
@@ -60,6 +58,7 @@ namespace Core.DAO
                 throw new InvalidOperationException(
                     "Knjiga ne postoji.");
 
+            knjiga.ISBN = existing.ISBN;
             int index = _knjige.IndexOf(existing);
             _knjige[index] = knjiga;
 

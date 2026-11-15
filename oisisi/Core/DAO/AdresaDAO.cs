@@ -1,4 +1,5 @@
 ﻿using Core.Models;
+using Core.Utils;
 using Core.Serialization;
 using Core.Validation;
 
@@ -26,6 +27,9 @@ namespace Core.DAO
         public Adresa Add(Adresa adresa)
         {
             AdresaValidator.Validate(adresa);
+            if (_adrese.Any(a => EntityComparison.SameAddress(a, adresa)))
+                throw new InvalidOperationException("Adresa sa istom ulicom, brojem, gradom i drzavom vec postoji.");
+
             int id = checked(_adrese.Select(a => a.Id).DefaultIfEmpty(0).Max() + 1);
             Adresa nova = new(adresa.Ulica, adresa.Broj, adresa.Grad, adresa.Drzava) { Id = id };
             List<Adresa> updated = new(_adrese) { nova };
@@ -39,6 +43,9 @@ namespace Core.DAO
             AdresaValidator.Validate(adresa);
             Adresa? existing = GetById(id);
             if (existing == null) return false;
+            if (_adrese.Any(a => a.Id != id && EntityComparison.SameAddress(a, adresa)))
+                throw new InvalidOperationException("Druga adresa sa tim podacima vec postoji.");
+
             Adresa nova = new(adresa.Ulica, adresa.Broj, adresa.Grad, adresa.Drzava) { Id = id };
             List<Adresa> updated = _adrese.Select(a => a.Id == id ? nova : a).ToList();
             Save(updated);

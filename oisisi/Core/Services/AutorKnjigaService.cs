@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Core.DAO;
 using Core.Models;
+using Core.Utils;
 using System.Linq;
 
 namespace Core.Services
@@ -43,7 +44,7 @@ namespace Core.Services
                 throw new InvalidOperationException(
                     "Autor je vec povezan sa ovom knjigom.");
 
-            _autorKnjigaDAO.Add(brojLicneKarte, isbn);
+            _autorKnjigaDAO.Add(autor.BrojLicneKarte, knjiga.ISBN);
         }
 
         public void UkloniAutoraSaKnjige(
@@ -88,7 +89,7 @@ namespace Core.Services
                 throw new ArgumentException(
                     "Broj licne karte autora ne moze biti prazan.");
 
-            List<string> autori = brojeviLicnihKarata.Distinct().ToList();
+            List<string> autori = brojeviLicnihKarata.DistinctBy(EntityComparison.IdentifierKey).ToList();
 
             foreach (string brojLicneKarte in autori)
             {

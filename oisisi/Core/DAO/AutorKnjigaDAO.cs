@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Core.Models;
+using Core.Utils;
 using Core.Serialization;
 using Core.Validation;
 
@@ -30,7 +31,7 @@ namespace Core.DAO
         public List<string> GetAutoriZaKnjigu(string isbn)
         {
             return _veze
-                .Where(v => v.ISBN == isbn)
+                .Where(v => EntityComparison.SameISBN(v.ISBN, isbn))
                 .Select(v => v.BrojLicneKarte)
                 .ToList();
         }
@@ -38,7 +39,7 @@ namespace Core.DAO
         public List<string> GetKnjigeZaAutora(string brojLicneKarte)
         {
             return _veze
-                .Where(v => v.BrojLicneKarte == brojLicneKarte)
+                .Where(v => EntityComparison.SameIdentifier(v.BrojLicneKarte, brojLicneKarte))
                 .Select(v => v.ISBN)
                 .ToList();
         }
@@ -46,8 +47,8 @@ namespace Core.DAO
         public bool Exists(string brojLicneKarte, string isbn)
         {
             return _veze.Any(v =>
-                v.BrojLicneKarte == brojLicneKarte &&
-                v.ISBN == isbn);
+                EntityComparison.SameIdentifier(v.BrojLicneKarte, brojLicneKarte) &&
+                EntityComparison.SameISBN(v.ISBN, isbn));
         }
 
         public void Add(string brojLicneKarte, string isbn)
@@ -66,8 +67,8 @@ namespace Core.DAO
         public void Delete(string brojLicneKarte, string isbn)
         {
             AutorKnjiga? veza = _veze.FirstOrDefault(v =>
-                v.BrojLicneKarte == brojLicneKarte &&
-                v.ISBN == isbn);
+                EntityComparison.SameIdentifier(v.BrojLicneKarte, brojLicneKarte) &&
+                EntityComparison.SameISBN(v.ISBN, isbn));
 
             if (veza == null)
                 throw new InvalidOperationException(

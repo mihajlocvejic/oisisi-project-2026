@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Core.Models;
+using Core.Utils;
 using Core.Serialization;
 using Core.Validation;
 
@@ -35,7 +36,7 @@ namespace Core.DAO
         public Autor? GetById(string brojLicneKarte)
         {
             return _autori.FirstOrDefault(
-                a => a.BrojLicneKarte == brojLicneKarte);
+                a => EntityComparison.SameIdentifier(a.BrojLicneKarte, brojLicneKarte));
         }
 
         public void Add(Autor autor)
@@ -64,6 +65,7 @@ namespace Core.DAO
                 throw new InvalidOperationException(
                     "Autor ne postoji.");
 
+            autor.BrojLicneKarte = existing.BrojLicneKarte;
             int index = _autori.IndexOf(existing);
             _autori[index] = autor;
 
