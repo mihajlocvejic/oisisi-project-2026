@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Core.Controllers;
 using Core.Models;
+using Core.Validation;
 
 namespace ConsoleClient.Views
 {
@@ -17,8 +18,8 @@ namespace ConsoleClient.Views
 
         public void AddKupovina()
         {
-            string brojClanskeKarte = ReadRequiredString("Broj clanske karte: ");
-            string isbn = ReadRequiredString("ISBN knjige: ");
+            string brojClanskeKarte = ReadMembershipCard("Broj clanske karte: ");
+            string isbn = ReadISBN("ISBN knjige: ");
             DateTime datumKupovine = ReadDate("Datum kupovine (dd.MM.yyyy): ");
             int ocena = ReadOcena("Ocena (1-5): ");
             string komentar = ReadKomentar("Komentar: ");
@@ -59,8 +60,8 @@ namespace ConsoleClient.Views
 
             Console.WriteLine($"Trenutni podaci: {postojeca}");
 
-            string brojClanskeKarte = ReadRequiredString("Novi broj clanske karte: ");
-            string isbn = ReadRequiredString("Novi ISBN knjige: ");
+            string brojClanskeKarte = ReadMembershipCard("Novi broj clanske karte: ");
+            string isbn = ReadISBN("Novi ISBN knjige: ");
             DateTime datumKupovine = ReadDate("Novi datum kupovine (dd.MM.yyyy): ");
             int ocena = ReadOcena("Nova ocena (1-5): ");
             string komentar = ReadKomentar("Novi komentar: ");
@@ -153,26 +154,31 @@ namespace ConsoleClient.Views
             }
         }
 
-        private string ReadRequiredString(string message)
+        private string ReadMembershipCard(string message)
         {
             while (true)
             {
                 Console.Write(message);
-                string value = Console.ReadLine()?.Trim() ?? string.Empty;
+                string card = Console.ReadLine()?.Trim() ?? string.Empty;
 
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Console.WriteLine("Polje ne sme biti prazno.");
-                    continue;
-                }
+                if (PosetilacValidator.IsValidMembershipCard(card))
+                    return card;
 
-                if (value.Contains('|'))
-                {
-                    Console.WriteLine("Znak | nije dozvoljen.");
-                    continue;
-                }
+                Console.WriteLine("Neispravan format. Primer: SK-1-2023.");
+            }
+        }
 
-                return value;
+        private string ReadISBN(string message)
+        {
+            while (true)
+            {
+                Console.Write(message);
+                string isbn = Console.ReadLine()?.Trim() ?? string.Empty;
+
+                if (KupovinaValidator.IsValidISBN(isbn))
+                    return isbn;
+
+                Console.WriteLine("Neispravan ISBN.");
             }
         }
 
@@ -187,7 +193,8 @@ namespace ConsoleClient.Views
                     "dd.MM.yyyy",
                     CultureInfo.InvariantCulture,
                     DateTimeStyles.None,
-                    out DateTime date) && date <= DateTime.Today)
+                    out DateTime date)
+                    && KupovinaValidator.IsValidPurchaseDate(date))
                 {
                     return date;
                 }
@@ -203,7 +210,7 @@ namespace ConsoleClient.Views
                 Console.Write(message);
 
                 if (int.TryParse(Console.ReadLine(), out int ocena)
-                    && ocena >= 1 && ocena <= 5)
+                    && KupovinaValidator.IsValidRating(ocena))
                 {
                     return ocena;
                 }
@@ -219,10 +226,10 @@ namespace ConsoleClient.Views
                 Console.Write(message);
                 string komentar = Console.ReadLine()?.Trim() ?? string.Empty;
 
-                if (!komentar.Contains('|'))
+                if (KupovinaValidator.IsValidComment(komentar))
                     return komentar;
 
-                Console.WriteLine("Znak | nije dozvoljen.");
+                Console.WriteLine("Komentar sadrzi nedozvoljene znakove.");
             }
         }
     }

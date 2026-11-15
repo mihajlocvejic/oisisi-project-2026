@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Core.DAO;
 using Core.Models;
+using Core.Validation;
 
 namespace Core.Controllers
 {
@@ -15,7 +16,7 @@ namespace Core.Controllers
 
         public bool Add(Kupovina kupovina)
         {
-            if (!IsValid(kupovina))
+            if (!KupovinaValidator.IsValid(kupovina))
                 return false;
 
             _dao.Add(kupovina);
@@ -25,7 +26,7 @@ namespace Core.Controllers
 
         public bool Update(int id, Kupovina kupovina)
         {
-            if (!IsValid(kupovina))
+            if (!KupovinaValidator.IsValid(kupovina))
                 return false;
 
             return _dao.Update(id, kupovina);
@@ -39,27 +40,6 @@ namespace Core.Controllers
         public List<Kupovina> GetAll()
         {
             return _dao.GetAll();
-        }
-
-        private bool IsValid(Kupovina kupovina)
-        {
-            return !string.IsNullOrWhiteSpace(kupovina.BrojClanskeKarte)
-                && !string.IsNullOrWhiteSpace(kupovina.ISBN)
-                && kupovina.DatumKupovine <= DateTime.Today
-                && kupovina.DatumKupovine != DateTime.MinValue
-                && kupovina.Ocena >= 1
-                && kupovina.Ocena <= 5
-                && IsValidText(kupovina.BrojClanskeKarte)
-                && IsValidText(kupovina.ISBN)
-                && IsValidText(kupovina.Komentar);
-        }
-
-        private bool IsValidText(string value)
-        {
-            return value != null
-                && !value.Contains('|')
-                && !value.Contains('\n')
-                && !value.Contains('\r');
         }
     }
 }
