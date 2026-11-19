@@ -59,6 +59,60 @@ namespace Core.Controllers
             return _dao.Remove(brojClanskeKarte);
         }
 
+        public bool CanAddZelja()
+        {
+            return _dao.GetAll().Count > 0
+                && _knjigaDAO.GetAll().Count > 0;
+        }
+
+        public bool AddZelja(string brojClanskeKarte, string isbn)
+        {
+            if (!PosetilacValidator.IsValidMembershipCard(brojClanskeKarte)
+                || !KnjigaValidator.IsValidISBN(isbn))
+                return false;
+
+            Posetilac? posetilac = _dao.GetById(brojClanskeKarte);
+            Knjiga? knjiga = _knjigaDAO.GetByISBN(isbn);
+
+            if (posetilac == null || knjiga == null)
+                return false;
+
+            if (posetilac.ListaZeljaISBN.Exists(k =>
+                EntityComparison.SameISBN(k, knjiga.ISBN)))
+                return false;
+
+            posetilac.ListaZeljaISBN.Add(knjiga.ISBN);
+            knjiga.ListaZeljaClanskeKarte.Add(posetilac.BrojClanskeKarte);
+
+            _dao.Save();
+
+            return true;
+        }
+
+        public bool RemoveZelja(string brojClanskeKarte, string isbn)
+        {
+            if (!PosetilacValidator.IsValidMembershipCard(brojClanskeKarte)
+                || !KnjigaValidator.IsValidISBN(isbn))
+                return false;
+
+            Posetilac? posetilac = _dao.GetById(brojClanskeKarte);
+            Knjiga? knjiga = _knjigaDAO.GetByISBN(isbn);
+
+            if (posetilac == null || knjiga == null)
+                return false;
+
+            if (posetilac.ListaZeljaISBN.RemoveAll(k =>
+                EntityComparison.SameISBN(k, knjiga.ISBN)) == 0)
+                return false;
+
+            knjiga.ListaZeljaClanskeKarte.RemoveAll(k =>
+                EntityComparison.SameIdentifier(k, posetilac.BrojClanskeKarte));
+
+            _dao.Save();
+
+            return true;
+        }
+
         public Posetilac? GetById(string brojClanskeKarte)
         {
             return _dao.GetById(brojClanskeKarte);

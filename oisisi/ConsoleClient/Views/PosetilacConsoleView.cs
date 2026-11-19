@@ -154,6 +154,46 @@ namespace ConsoleClient.Views
             }
         }
 
+        public void AddZelja()
+        {
+            if (!_controller.CanAddZelja())
+            {
+                Console.WriteLine("Nema posetilaca ili knjiga.");
+                return;
+            }
+
+            string brojClanskeKarte =
+                ReadMembershipCard("Broj clanske karte: ");
+
+            string isbn = ReadRequiredString("ISBN knjige: ");
+
+            if (_controller.AddZelja(brojClanskeKarte, isbn))
+            {
+                Console.WriteLine("Knjiga je dodata na listu zelja.");
+            }
+            else
+            {
+                Console.WriteLine("Dodavanje knjige na listu zelja nije uspelo.");
+            }
+        }
+
+        public void RemoveZelja()
+        {
+            string brojClanskeKarte =
+                ReadMembershipCard("Broj clanske karte: ");
+
+            string isbn = ReadRequiredString("ISBN knjige: ");
+
+            if (_controller.RemoveZelja(brojClanskeKarte, isbn))
+            {
+                Console.WriteLine("Knjiga je uklonjena sa liste zelja.");
+            }
+            else
+            {
+                Console.WriteLine("Uklanjanje knjige sa liste zelja nije uspelo.");
+            }
+        }
+
         public void ShowMenu()
         {
             while (true)
@@ -163,6 +203,8 @@ namespace ConsoleClient.Views
                 Console.WriteLine("2. Izmena posetioca");
                 Console.WriteLine("3. Brisanje posetioca");
                 Console.WriteLine("4. Prikaz posetilaca");
+                Console.WriteLine("5. Dodavanje knjige na listu zelja");
+                Console.WriteLine("6. Uklanjanje knjige sa liste zelja");
                 Console.WriteLine("0. Izlaz");
                 Console.Write("Izaberite opciju: ");
 
@@ -179,6 +221,12 @@ namespace ConsoleClient.Views
                         break;
                     case "4":
                         ShowPosetioci();
+                        break;
+                    case "5":
+                        AddZelja();
+                        break;
+                    case "6":
+                        RemoveZelja();
                         break;
                     case "0":
                         return;

@@ -130,7 +130,13 @@ namespace ConsoleClient.Views
         {
             while (true)
             {
-                Console.WriteLine("\n--- Autori ---\n1. Dodaj\n2. Izmeni\n3. Obrisi\n4. Prikazi\n0. Nazad");
+                Console.WriteLine("\n--- Upravljanje autorima ---");
+                Console.WriteLine("1. Dodavanje autora");
+                Console.WriteLine("2. Izmena autora");
+                Console.WriteLine("3. Brisanje autora");
+                Console.WriteLine("4. Prikaz autora");
+                Console.WriteLine("0. Izlaz");
+                Console.Write("Izaberite opciju: ");
                 string? choice = Console.ReadLine();
                 if (choice == null || choice.Trim() == "0") return;
                 try

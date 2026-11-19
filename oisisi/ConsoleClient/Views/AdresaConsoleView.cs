@@ -71,7 +71,13 @@ namespace ConsoleClient.Views
         {
             while (true)
             {
-                Console.WriteLine("\n--- Adrese ---\n1. Dodaj\n2. Izmeni\n3. Obrisi\n4. Prikazi\n0. Nazad");
+                Console.WriteLine("\n--- Upravljanje adresama ---");
+                Console.WriteLine("1. Dodavanje adrese");
+                Console.WriteLine("2. Izmena adrese");
+                Console.WriteLine("3. Brisanje adrese");
+                Console.WriteLine("4. Prikaz adresa");
+                Console.WriteLine("0. Izlaz");
+                Console.Write("Izaberite opciju: ");
                 string? izbor = Console.ReadLine();
                 if (izbor == null || izbor.Trim() == "0") return;
                 try

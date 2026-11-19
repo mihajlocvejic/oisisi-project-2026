@@ -182,7 +182,16 @@ namespace ConsoleClient.Views
         {
             while (true)
             {
-                Console.WriteLine("\n--- Knjige ---\n1. Dodaj\n2. Izmeni\n3. Obrisi\n4. Prikazi sve\n5. Pronadji po ISBN-u\n6. Dodaj autora\n7. Ukloni autora\n0. Nazad");
+                Console.WriteLine("\n--- Upravljanje knjigama ---");
+                Console.WriteLine("1. Dodavanje knjige");
+                Console.WriteLine("2. Izmena knjige");
+                Console.WriteLine("3. Brisanje knjige");
+                Console.WriteLine("4. Prikaz knjiga");
+                Console.WriteLine("5. Pretraga knjige po ISBN-u");
+                Console.WriteLine("6. Dodavanje autora knjizi");
+                Console.WriteLine("7. Uklanjanje autora knjige");
+                Console.WriteLine("0. Izlaz");
+                Console.Write("Izaberite opciju: ");
                 string? choice = Console.ReadLine();
                 if (choice == null || choice.Trim() == "0") return;
                 try
